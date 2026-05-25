@@ -1,0 +1,29 @@
+class Player {
+    pub       name:   str
+    pub   var hp:     int = 100
+    pub   var score:  int = 0
+    priv  var secret: str = "hunter2"
+}
+
+impl Player {
+
+    // static constructor — no self
+    pub fn new(name: str) -> Self {
+        Self { name: name, hp: 100, score: 0, secret: "hunter2" }
+    }
+
+    // pure method — reads state, guarantees no mutation
+    pub fn is_alive(self) -> bool {
+        self.hp > 0
+    }
+
+    // mutating method — must declare mut self
+    pub fn take_damage(mut self, amount: int) -> void! {
+        if (amount < 0) { fail GameError::new("negative damage") }
+        self.hp = (self.hp - amount).clamp(0, 100)
+    }
+
+    // static utility — no self at all
+    pub fn max_hp() -> int { 100 }
+
+}
