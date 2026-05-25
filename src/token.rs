@@ -1,6 +1,5 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
-
     // =========================================================
     // 1. Keywords (from spec §31)
     // =========================================================
@@ -18,8 +17,8 @@ pub enum Token {
     Interface,
     Enum,
 
-    SelfLower,   // `self`
-    SelfUpper,   // `Self`
+    SelfLower, // `self`
+    SelfUpper, // `Self`
 
     Pub,
     Priv,
@@ -78,37 +77,37 @@ pub enum Token {
     // =========================================================
     // 3. Operators (spec §28 + §30)
     // =========================================================
-    Assign,        // =
-    Plus,          // +
-    Minus,         // -
-    Star,          // *
-    Slash,         // /
-    Percent,       // %
-    Power,         // **
+    Assign,  // =
+    Plus,    // +
+    Minus,   // -
+    Star,    // *
+    Slash,   // /
+    Percent, // %
+    Power,   // **
 
-    Equal,         // ==
-    NotEqual,      // !=
-    Less,          // <
-    Greater,       // >
-    LessEq,        // <=
-    GreaterEq,     // >=
+    Equal,     // ==
+    NotEqual,  // !=
+    Less,      // <
+    Greater,   // >
+    LessEq,    // <=
+    GreaterEq, // >=
 
-    And,           // &&
-    OrOp,          // ||
-    Not,           // !
+    And,  // &&
+    OrOp, // ||
+    Not,  // !
 
-    BitAnd,        // &
-    BitOr,         // |
-    BitXor,        // ^
-    BitNot,        // ~
+    BitAnd, // &
+    BitOr,  // |
+    BitXor, // ^
+    BitNot, // ~
 
-    Shl,           // <<
-    Shr,           // >>
+    Shl, // <<
+    Shr, // >>
 
     // =========================================================
     // 4. Obsidian-specific operators
     // =========================================================
-    SparkFeed,          // -:
+    SparkFeed,     // -:
     Arrow,         // ->
     FatArrow,      // =>
     Range,         // ..
@@ -121,9 +120,12 @@ pub enum Token {
     // =========================================================
     // 5. Delimiters
     // =========================================================
-    LParen, RParen,       // ( )
-    LBrace, RBrace,       // { }
-    LBracket, RBracket,   // [ ]
+    LParen,
+    RParen, // ( )
+    LBrace,
+    RBrace, // { }
+    LBracket,
+    RBracket, // [ ]
 
     Comma,
     Dot,
@@ -134,4 +136,5 @@ pub enum Token {
     // 6. Special
     // =========================================================
     EOF,
+    Unknown(char),
 }
