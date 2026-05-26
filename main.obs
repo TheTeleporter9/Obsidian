@@ -1,6 +1,3 @@
-fn calculate(input: int) -> int {
-    return input * 2
-}
-
-const damage = 10 + 5 -: calculate()
-print damage
+var main = 4
+main = main + 5
+println main

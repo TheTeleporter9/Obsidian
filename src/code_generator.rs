@@ -90,7 +90,7 @@ impl<'a> CodeGenerator<'a> {
             } => {
                 let init_c = self.generate_node(*initializer);
                 let const_prefix = if !*is_mutable { "const " } else { "" };
-                format!("{}int64_t {} = {};\n", const_prefix, name, init_c)
+                format!("{}int {} = {};\n", const_prefix, name, init_c)
             }
 
             ASTNode::SparkFeedPipeline {
@@ -103,7 +103,7 @@ impl<'a> CodeGenerator<'a> {
 
             ASTNode::PrintStatement { value } => {
                 let inner_c = self.generate_node(*value);
-                format!("printf(\"%lld\\n\", {});\n", inner_c)
+                format!("printf(\"%d\\n\", {});\n", inner_c)
             }
 
             ASTNode::FunctionDeclaration {
@@ -117,7 +117,7 @@ impl<'a> CodeGenerator<'a> {
                     if i > 0 {
                         params_c.push_str(", ");
                     }
-                    let c_type = if p_type == "int" { "int64_t" } else { "double" };
+                    let c_type = if p_type == "int" { "int" } else { "double" };
                     params_c.push_str(&format!("{} {}", c_type, p_name));
                 }
 

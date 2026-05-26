@@ -1,7 +1,9 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 int main() {
-    const int64_t damage = calculate(10 + 5);
+    const int main = 4;
+    printf("%d\n", main);
     return 0;
 }
