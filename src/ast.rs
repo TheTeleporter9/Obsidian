@@ -1,30 +1,44 @@
-
 use crate::token::Token;
 
-#[derive(Debug,Clone,PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ASTNode {
     BinaryOp {
-    operator: Token,
-    left: usize,
-    right: usize,
+        operator: Token,
+        left: usize,
+        right: usize,
     },
 
     VariableDecleration {
-    name: String,
-    is_mutable: bool,
-    initializer: usize,
+        name: String,
+        is_mutable: bool,
+        initializer: usize,
     },
 
     SparkFeedPipeline {
-    input: usize,
-    function_name: String,
+        input: usize,
+        function_name: String,
     },
 
-   IntLiteral(i64),
-   FloatLiteral(f64),
-   BoolLiteral(bool),
-   StringLiteral(String),
-   Identifier(String),
+    PrintStatement {
+        value: usize,
+    },
+
+    FunctionDeclaration {
+        name: String,
+        params: Vec<(String, String)>,
+        return_type: String,
+        body: Vec<usize>,
+    },
+
+    ReturnStatement {
+        value: Option<usize>,
+    },
+
+    IntLiteral(i64),
+    FloatLiteral(f64),
+    BoolLiteral(bool),
+    StringLiteral(String),
+    Identifier(String),
 }
 
 #[derive(Debug, Clone)]
@@ -34,9 +48,7 @@ pub struct ASTArena {
 
 impl ASTArena {
     pub fn new() -> Self {
-        Self {
-            pool: Vec::new(),
-        }
+        Self { pool: Vec::new() }
     }
 
     pub fn alloc(&mut self, node: ASTNode) -> usize {
@@ -46,6 +58,6 @@ impl ASTArena {
     }
 
     pub fn get(&self, index: usize) -> &ASTNode {
-       return  &self.pool[index];
+        return &self.pool[index];
     }
 }

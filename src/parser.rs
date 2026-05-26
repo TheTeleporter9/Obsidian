@@ -1,5 +1,5 @@
-use crate::token::Token;
 use crate::ast::{ASTArena, ASTNode};
+use crate::token::Token;
 
 // Struct tracking tokens, cursor position, and the flat memory warehouse
 pub struct Parser {
@@ -38,7 +38,10 @@ impl Parser {
         if current == Some(&expected) {
             self.advance().unwrap()
         } else {
-            panic!("Syntax Error: Expected token layout match error. Found: {:?}", current);
+            panic!(
+                "Syntax Error: Expected token layout match error. Found: {:?}",
+                current
+            );
         }
     }
 
@@ -63,8 +66,11 @@ impl Parser {
 
         match token {
             Token::Const => self.parse_variable_declaration(false),
-            Token::Var   => self.parse_variable_declaration(true),
-            _            => self.parse_expression(),
+            Token::Var => self.parse_variable_declaration(true),
+            Token::Print => self.parse_print_statement(),
+            Token::Fn => self.parse_function_declaration(),
+            Token::Return => self.parse_return_statement(),
+            _ => self.parse_expression(),
         }
     }
 
@@ -104,55 +110,72 @@ impl Parser {
     }
 
     // Evaluates expression layers and manages the Spark Feed pipeline operator (-:)
-    fn parse_expression(&mut self) -> usize {
-        // Parse math precedence layers first
-        let mut left_id = self.parse_math_addition();
+    pub fn parse_expression(&mut self) -> usize {
+        // Math addition handles + and -, and calls multiplication internally
+        self.parse_additive_expression()
+    }
 
-        // Check if the resulting value is being piped downstream into a function
-        while self.peek() == Some(&Token::SparkFeed) {
-            self.advance(); // Skip the '-:' token
+    // 2. Handle Addition and Subtraction (+, -)
+    fn parse_additive_expression(&mut self) -> usize {
+        let mut left_id = self.parse_multiplicative_expression();
 
-            // Grab the name of the function receiving the data
-            let func_name = match self.advance() {
+        while let Some(token) = self.peek() {
+            match token {
+                Token::Plus | Token::Minus => {
+                    let operator = self.advance().unwrap(); // Consume the operator
+                    let right_id = self.parse_multiplicative_expression();
+
+                    left_id = self.arena.alloc(ASTNode::BinaryOp {
+                        operator,
+                        left: left_id,
+                        right: right_id,
+                    });
+                }
+                _ => break,
+            }
+        }
+
+        // After math is done, check if there is a spark-feed pipeline attached to it
+        if self.peek() == Some(&Token::SparkFeed) {
+            self.advance(); // Skip '-:'
+            let function_name = match self.advance() {
                 Some(Token::Identifier(name)) => name,
-                _ => panic!("Syntax Error: Expected target function identifier for pipeline feed"),
+                _ => panic!("Syntax Error: Expected target function identifier after '-:'"),
             };
 
-            self.expect(Token::LParen); // Skip opening '('
-            self.expect(Token::RParen); // Skip closing ')'
+            // Handle optional empty parentheses ()
+            if self.peek() == Some(&Token::LParen) {
+                self.advance(); // consume '('
+                self.expect(Token::RParen); // consume ')'
+            }
 
-            // Create a pipeline step node linking back to the previous left_id index
-            let pipeline_node = ASTNode::SparkFeedPipeline {
+            left_id = self.arena.alloc(ASTNode::SparkFeedPipeline {
                 input: left_id,
-                function_name: func_name,
-            };
-
-            // Re-assign left_id to the pipeline index for any multi-stage piping
-            left_id = self.arena.alloc(pipeline_node);
+                function_name,
+            });
         }
 
         left_id
     }
 
-    // Processes standard addition and subtraction binary math expression sequences
-    fn parse_math_addition(&mut self) -> usize {
-        let mut left_id = self.parse_primary();
+    // 3. Handle Multiplication and Division (*, /)
+    fn parse_multiplicative_expression(&mut self) -> usize {
+        let mut left_id = self.parse_primary(); // Base value (numbers, identifiers)
 
-        while self.peek() == Some(&Token::Plus) || self.peek() == Some(&Token::Minus) {
-            let operator_token = self.advance().unwrap(); // Save '+' or '-' operator
+        while let Some(token) = self.peek() {
+            match token {
+                Token::Star | Token::Slash => {
+                    let operator = self.advance().unwrap(); // Consume * or /
+                    let right_id = self.parse_primary();
 
-            // Parse the right-hand value operand
-            let right_id = self.parse_primary();
-
-            // Construct our binary operator data block structure
-            let math_node = ASTNode::BinaryOp {
-                operator: operator_token,
-                left: left_id,
-                right: right_id,
-            };
-
-            // Allocate the math operation and update our running left index address
-            left_id = self.arena.alloc(math_node);
+                    left_id = self.arena.alloc(ASTNode::BinaryOp {
+                        operator,
+                        left: left_id,
+                        right: right_id,
+                    });
+                }
+                _ => break,
+            }
         }
 
         left_id
@@ -161,17 +184,96 @@ impl Parser {
     // Resolves individual terminal literal values and basic variable names
     fn parse_primary(&mut self) -> usize {
         match self.advance() {
-            Some(Token::IntLiteral(val))    => self.arena.alloc(ASTNode::IntLiteral(val)),
-            Some(Token::FloatLiteral(val))  => self.arena.alloc(ASTNode::FloatLiteral(val)),
-            Some(Token::BoolLiteral(val))   => self.arena.alloc(ASTNode::BoolLiteral(val)),
+            Some(Token::IntLiteral(val)) => self.arena.alloc(ASTNode::IntLiteral(val)),
+            Some(Token::FloatLiteral(val)) => self.arena.alloc(ASTNode::FloatLiteral(val)),
+            Some(Token::BoolLiteral(val)) => self.arena.alloc(ASTNode::BoolLiteral(val)),
             Some(Token::StringLiteral(val)) => self.arena.alloc(ASTNode::StringLiteral(val)),
-            Some(Token::Identifier(name))   => self.arena.alloc(ASTNode::Identifier(name)),
+            Some(Token::Identifier(name)) => self.arena.alloc(ASTNode::Identifier(name)),
             Some(unrecognized) => {
-                panic!("Syntax Error: Expected a core value. Found: {:?}", unrecognized);
+                panic!(
+                    "Syntax Error: Expected a core value. Found: {:?}",
+                    unrecognized
+                );
             }
             None => panic!("Syntax Error: Encountered unexpected end of file bounds"),
         }
     }
 
+    fn parse_print_statement(&mut self) -> usize {
+        self.advance(); //skip the print keyword
 
+        let value_id = self.parse_expression();
+
+        let print_node = ASTNode::PrintStatement { value: value_id };
+        self.arena.alloc(print_node)
+    }
+
+    fn parse_function_declaration(&mut self) -> usize {
+        self.advance(); // Consume 'fn'
+
+        let name = match self.advance() {
+            Some(Token::Identifier(s)) => s,
+            _ => panic!("Syntax Error: Expected function name identifier"),
+        };
+
+        self.expect(Token::LParen);
+        let mut params = Vec::new();
+
+        // Parse parameters list: (input: int, scalar: float)
+        while self.peek() != Some(&Token::RParen) {
+            let param_name = match self.advance() {
+                Some(Token::Identifier(s)) => s,
+                _ => panic!("Expected parameter name"),
+            };
+            self.expect(Token::Colon);
+            let param_type = match self.advance() {
+                Some(Token::Identifier(s)) => s,
+                _ => panic!("Expected parameter type"),
+            };
+
+            params.push((param_name, param_type));
+
+            if self.peek() == Some(&Token::Comma) {
+                self.advance(); // Skip comma separator
+            }
+        }
+        self.expect(Token::RParen);
+        self.expect(Token::Arrow); // Skip '->'
+
+        let return_type = match self.advance() {
+            Some(Token::Identifier(s)) => s,
+            _ => panic!("Expected return type identifier"),
+        };
+
+        self.expect(Token::LBrace); // Skip opening '{'
+
+        // Parse the inner block body statements
+        let mut body = Vec::new();
+        while self.peek() != Some(&Token::RBrace) && self.peek() != Some(&Token::EOF) {
+            body.push(self.parse_statement());
+        }
+        self.expect(Token::RBrace); // Skip closing '}'
+
+        let fn_node = ASTNode::FunctionDeclaration {
+            name,
+            params,
+            return_type,
+            body,
+        };
+        self.arena.alloc(fn_node)
+    }
+
+    fn parse_return_statement(&mut self) -> usize {
+        self.advance(); // Consume 'return' keyword
+
+        // Check if there is an expression following the return statement
+        let value = if self.peek() != Some(&Token::RBrace) && self.peek() != Some(&Token::EOF) {
+            Some(self.parse_expression())
+        } else {
+            None
+        };
+
+        let return_node = ASTNode::ReturnStatement { value };
+        self.arena.alloc(return_node)
+    }
 }

@@ -1,38 +1,80 @@
-mod lexer;
-mod token;
-mod ast;
-mod parser;
+pub mod ast;
+pub mod code_generator;
+pub mod lexer;
+pub mod parser;
+pub mod token;
+pub mod typecherker;
 
+use std::env; // Used to read command-line arguments
+use std::fs; // Used to read files from disk
+use std::process; // Used to exit cleanly on errors
+
+use code_generator::CodeGenerator;
 use lexer::Lexer;
-use std::fs;
 use parser::Parser;
-
+use typecherker::TypeChecker;
 
 fn main() {
-    // 1. Define a piece of test source code using your syntax features
-    let source_code = String::from("const damage = 10 + 5 -: calculate()");
+    // 1. Collect arguments passed via the terminal command line
+    let args: Vec<String> = env::args().collect();
 
-    println!("--- Starting Compilation Run ---");
-    println!("Source: {}\n", source_code);
+    // The first argument (args[0]) is always the compiler binary name itself.
+    // The second argument (args[1]) should be our file path.
+    if args.len() < 2 {
+        println!("Usage Error: Please provide a source file path.");
+        println!("Example: cargo run path/to/file.obs");
+        process::exit(1);
+    }
 
-    // 2. Initialize the lexer and extract the token vector array
+    let file_path = &args[1];
+
+    // 2. Load the contents of the .obs file into a string
+    println!("Loading source file: {} ...", file_path);
+    let source_code = match fs::read_to_string(file_path) {
+        Ok(content) => content,
+        Err(error) => {
+            println!(
+                "File Error: Could not read file '{}' ({})",
+                file_path, error
+            );
+            process::exit(1);
+        }
+    };
+
+    println!("--- Starting Obsidian Compilation Pipeline ---\n");
+
+    // Phase 1: Lexical Analysis (Tokens)
     let mut my_lexer = Lexer::new(source_code);
     let token_stream = my_lexer.tokenize();
-    
-    println!("Generated Tokens: {:?}", token_stream);
-    println!("--------------------------------");
 
-    // 3. Initialize your parser with those tokens
+    // Phase 2: Parsing (Syntax Construction)
     let mut my_parser = Parser::new(token_stream);
-    
-    // 4. Run the parser to populate the arena warehouse
     let root_statement_ids = my_parser.parse_program();
 
-    // 5. Print out the root positions returned by the parser execution run
-    println!("Root Statement Index IDs: {:?}", root_statement_ids);
-    println!("--------------------------------");
+    // Phase 3: Semantic Analysis (Type Safety Verification)
+    println!("Running Type Checker...");
+    let mut checker = TypeChecker::new(&my_parser.arena);
+    checker.check_program(&root_statement_ids);
+    println!("Type check passed smoothly!\n");
 
-    // 6. Print out the inte, current;rnal flat arena vector layout to verify allocations
-    println!("Final Flat AST Arena Structure:");
-    println!("{:#?}", my_parser.arena);
+    // Phase 4: Code Generation (Transpiling to C)
+    println!("Generating Target C Source Code...");
+    let generator = CodeGenerator::new(&my_parser.arena);
+    let final_c_output = generator.generate_program(&root_statement_ids);
+
+    println!("----------------------------------------------");
+    println!("EMITTED C CODE OUTPUT:\n");
+    println!("{}", final_c_output);
+    println!("----------------------------------------------");
+
+    // Optional Step 5: Save the output string as an actual .c file on disk
+    let output_path = "output.c";
+    if let Err(e) = fs::write(output_path, final_c_output) {
+        println!("Warning: Could not save compiled C file to disk: {}", e);
+    } else {
+        println!(
+            "Successfully compiled and wrote output to '{}'!",
+            output_path
+        );
+    }
 }

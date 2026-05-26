@@ -50,53 +50,54 @@ impl Lexer {
 
         // Map matching string slices directly to explicit keyword variants
         match slice.as_str() {
-            "package"   => Token::Package,
-            "import"    => Token::Import,
-            "const"     => Token::Const,
-            "var"       => Token::Var,
-            "fn"        => Token::Fn,
-            "return"    => Token::Return,
-            "class"     => Token::Class,
-            "impl"      => Token::Impl,
+            "package" => Token::Package,
+            "import" => Token::Import,
+            "const" => Token::Const,
+            "var" => Token::Var,
+            "fn" => Token::Fn,
+            "return" => Token::Return,
+            "class" => Token::Class,
+            "impl" => Token::Impl,
             "interface" => Token::Interface,
-            "enum"      => Token::Enum,
-            "self"      => Token::SelfLower,
-            "Self"      => Token::SelfUpper,
-            "pub"       => Token::Pub,
-            "priv"      => Token::Priv,
-            "mut"       => Token::Mut,
-            "if"        => Token::If,
-            "else"      => Token::Else,
-            "for"       => Token::For,
-            "while"     => Token::While,
-            "loop"      => Token::Loop,
-            "break"     => Token::Break,
-            "continue"  => Token::Continue,
-            "match"     => Token::Match,
-            "fail"      => Token::Fail,
-            "pass"      => Token::Pass,
-            "guard"     => Token::Guard,
-            "try"       => Token::Try,
-            "catch"     => Token::Catch,
-            "defer"     => Token::Defer,
-            "alloc"     => Token::Alloc,
-            "free"      => Token::Free,
-            "async"     => Token::Async,
-            "await"     => Token::Await,
-            "spawn"     => Token::Spawn,
-            "scope"     => Token::Scope,
-            "comptime"  => Token::Comptime,
-            "true"      => Token::BoolLiteral(true),
-            "false"     => Token::BoolLiteral(false),
-            "none"      => Token::None,
-            "some"      => Token::Some,
-            "void"      => Token::Void,
-            "never"     => Token::Never,
-            "any"       => Token::Any,
-            "in"        => Token::In,
-            "or"        => Token::Or,
-            "step"      => Token::Step,
-            _           => Token::Identifier(slice),
+            "enum" => Token::Enum,
+            "self" => Token::SelfLower,
+            "Self" => Token::SelfUpper,
+            "pub" => Token::Pub,
+            "priv" => Token::Priv,
+            "mut" => Token::Mut,
+            "if" => Token::If,
+            "else" => Token::Else,
+            "for" => Token::For,
+            "while" => Token::While,
+            "loop" => Token::Loop,
+            "break" => Token::Break,
+            "continue" => Token::Continue,
+            "match" => Token::Match,
+            "fail" => Token::Fail,
+            "pass" => Token::Pass,
+            "guard" => Token::Guard,
+            "try" => Token::Try,
+            "catch" => Token::Catch,
+            "defer" => Token::Defer,
+            "alloc" => Token::Alloc,
+            "free" => Token::Free,
+            "async" => Token::Async,
+            "await" => Token::Await,
+            "spawn" => Token::Spawn,
+            "scope" => Token::Scope,
+            "comptime" => Token::Comptime,
+            "true" => Token::BoolLiteral(true),
+            "false" => Token::BoolLiteral(false),
+            "none" => Token::None,
+            "some" => Token::Some,
+            "void" => Token::Void,
+            "never" => Token::Never,
+            "any" => Token::Any,
+            "in" => Token::In,
+            "or" => Token::Or,
+            "step" => Token::Step,
+            "println" => Token::Print,
+            _ => Token::Identifier(slice),
         }
     }
 
@@ -108,7 +109,10 @@ impl Lexer {
         while let Some(c) = self.peek() {
             if c.is_ascii_digit() {
                 self.pos += 1;
-            } else if c == '.' && self.peek_next().map_or(false, |next| next.is_ascii_digit()) && !is_float {
+            } else if c == '.'
+                && self.peek_next().map_or(false, |next| next.is_ascii_digit())
+                && !is_float
+            {
                 // Ensure dot is followed by a digit to avoid consuming range operators
                 is_float = true;
                 self.pos += 1;
@@ -120,9 +124,15 @@ impl Lexer {
         let slice: String = self.chars[start..self.pos].iter().collect();
 
         if is_float {
-            slice.parse().map(Token::FloatLiteral).unwrap_or(Token::Unknown('.'))
+            slice
+                .parse()
+                .map(Token::FloatLiteral)
+                .unwrap_or(Token::Unknown('.'))
         } else {
-            slice.parse().map(Token::IntLiteral).unwrap_or(Token::Unknown('0'))
+            slice
+                .parse()
+                .map(Token::IntLiteral)
+                .unwrap_or(Token::Unknown('0'))
         }
     }
 
@@ -325,19 +335,58 @@ impl Lexer {
             }
 
             // Single character assignments and delimiters
-            '+' => { self.advance(); Token::Plus }
-            '/' => { self.advance(); Token::Slash }
-            '%' => { self.advance(); Token::Percent }
-            '^' => { self.advance(); Token::BitXor }
-            '~' => { self.advance(); Token::BitNot }
-            '(' => { self.advance(); Token::LParen }
-            ')' => { self.advance(); Token::RParen }
-            '{' => { self.advance(); Token::LBrace }
-            '}' => { self.advance(); Token::RBrace }
-            '[' => { self.advance(); Token::LBracket }
-            ']' => { self.advance(); Token::RBracket }
-            ',' => { self.advance(); Token::Comma }
-            ';' => { self.advance(); Token::Semicolon }
+            '+' => {
+                self.advance();
+                Token::Plus
+            }
+            '/' => {
+                self.advance();
+                Token::Slash
+            }
+            '%' => {
+                self.advance();
+                Token::Percent
+            }
+            '^' => {
+                self.advance();
+                Token::BitXor
+            }
+            '~' => {
+                self.advance();
+                Token::BitNot
+            }
+            '(' => {
+                self.advance();
+                Token::LParen
+            }
+            ')' => {
+                self.advance();
+                Token::RParen
+            }
+            '{' => {
+                self.advance();
+                Token::LBrace
+            }
+            '}' => {
+                self.advance();
+                Token::RBrace
+            }
+            '[' => {
+                self.advance();
+                Token::LBracket
+            }
+            ']' => {
+                self.advance();
+                Token::RBracket
+            }
+            ',' => {
+                self.advance();
+                Token::Comma
+            }
+            ';' => {
+                self.advance();
+                Token::Semicolon
+            }
             '"' => self.scan_string(),
 
             // Fallback path handles unrecognized single tokens safely
