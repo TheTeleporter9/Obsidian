@@ -1,6 +1,7 @@
 mod lexer;
 mod parser;
 mod tokens;
+mod type_checker;
 
 use crate::lexer::Lexer;
 use crate::tokens::Tokens;

@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum Tokens {
     Identifier(String),
     LiteralInt(i32),
