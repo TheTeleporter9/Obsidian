@@ -19,8 +19,8 @@ impl Lexer {
         while self.current_index_pos < self.source.len() {
             let current_char = self.source[self.current_index_pos];
 
-            //Step1: skip white spaces
-            if current_char.is_whitespace() {
+            //Step1: skip white spaces and comments
+            if current_char.is_whitespace() || current_char == '#' {
                 self.current_index_pos += 1;
                 continue;
             }
@@ -85,6 +85,7 @@ impl Lexer {
             "const" => Tokens::CONST,
             "var" => Tokens::VAR,
             "print" => Tokens::PRINT,
+            "func" => Tokens::FUNC,
 
             _ => Tokens::Identifier(string),
         }

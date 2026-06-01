@@ -1,11 +1,12 @@
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Tokens {
     Identifier(String),
-    LiteralInt(i32),
+    LiteralInt(i64),
 
     CONST,
     VAR,
     PRINT,
+    FUNC,
 
     OperatorAssign,
     OperatorSpark,
@@ -18,6 +19,9 @@ pub enum Tokens {
     BracketClose,
     BraceOpen,
     BraceClose,
+
+    TypeInt,
+    TypeString,
 
     ERROR,
     EOF,
