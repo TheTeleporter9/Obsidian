@@ -2,10 +2,11 @@ mod AST;
 mod lexer;
 mod parser;
 mod tokens;
+mod transpile_c;
 
 use crate::lexer::Lexer;
-use crate::tokens::Tokens;
 use crate::parser::Parser;
+use crate::tokens::Tokens;
 use std::fs;
 
 fn main() {
@@ -24,11 +25,11 @@ fn main() {
 
     println!("*****************************************************************");
 
-    let mut parser  = Parser::new(lexer.tokens_out);
+    let mut parser = Parser::new(lexer.tokens_out);
 
-    parser.parse();
+    let parser_out = parser.parse();
 
-    for ast_token in &parser.tokens {
+    for ast_token in parser_out {
         println!("{:?}", ast_token);
     }
 }
