@@ -17,7 +17,7 @@ use std::process::Command;
 // engineered from scratch. Future development is entirely human-written.
 // ============================================================================
 fn main() -> std::io::Result<()> {
-    let src = fs::read_to_string("main.obs")?;
+    let src = fs::read_to_string("examples/main.obs")?;
 
     let mut lexer = Lexer::new(src);
 
