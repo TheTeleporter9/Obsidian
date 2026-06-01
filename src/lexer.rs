@@ -1,5 +1,10 @@
 use crate::tokens::Tokens::{self, VAR};
-
+// ============================================================================
+// DEVELOPMENT NOTE: 
+// Initial logic for this system was drafted using AI pseudocode.
+// The entire codebase has since been manually rewritten, refactored, and 
+// engineered from scratch. Future development is entirely human-written.
+// ============================================================================
 pub struct Lexer {
     source: Vec<char>,
     current_index_pos: usize,

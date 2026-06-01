@@ -10,11 +10,12 @@ use crate::transpile_c::transpile_to_c;
 use std::{fs, io};
 use std::process::Command;
 
-/**
- * ARCHITECTURE NOTE:
- * - Used Gemnini to generate initial pseudocode for the research tree logic.
- * - Manually implemented, refactored, and integrated the logic into this codebase.
- */
+// ============================================================================
+// DEVELOPMENT NOTE: 
+// Initial logic for this system was drafted using AI pseudocode.
+// The entire codebase has since been manually rewritten, refactored, and 
+// engineered from scratch. Future development is entirely human-written.
+// ============================================================================
 fn main() -> std::io::Result<()> {
     let src = fs::read_to_string("main.obs")?;
 

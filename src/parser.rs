@@ -1,6 +1,12 @@
 use crate::AST::ASTNode;
 use crate::tokens::Tokens;
 
+// ============================================================================
+// DEVELOPMENT NOTE: 
+// Initial logic for this system was drafted using AI pseudocode.
+// The entire codebase has since been manually rewritten, refactored, and 
+// engineered from scratch. Future development is entirely human-written.
+// ============================================================================
 pub struct Parser {
     pub tokens: Vec<Tokens>,
     position: usize,

@@ -2,6 +2,13 @@ use std::fmt::format;
 
 use crate::AST::ASTNode;
 
+// ============================================================================
+// DEVELOPMENT NOTE: 
+// Initial logic for this system was drafted using AI pseudocode.
+// The entire codebase has since been manually rewritten, refactored, and 
+// engineered from scratch. Future development is entirely human-written.
+// ============================================================================
+
 pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
     let mut c_code_output = String::new();
 
