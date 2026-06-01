@@ -2,9 +2,9 @@ use crate::AST::ASTNode;
 use crate::tokens::Tokens;
 
 // ============================================================================
-// DEVELOPMENT NOTE: 
+// DEVELOPMENT NOTE:
 // Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and 
+// The entire codebase has since been manually rewritten, refactored, and
 // engineered from scratch. Future development is entirely human-written.
 // ============================================================================
 pub struct Parser {
@@ -94,20 +94,61 @@ impl Parser {
             _ => panic!("Expected integer or a variable"),
         };
 
-        if self.position < self.tokens.len()
-            && matches!(self.tokens[self.position], Tokens::OperatorAdd)
-        {
-            self.advance();
-
-            let right_node = self.parse_expression();
-
-            ASTNode::BinaryOperaion {
-                left: Box::new(left_node),
-                operator: "+".to_string(),
-                right: Box::new(right_node),
-            }
-        } else {
-            left_node
+        if self.position >= self.tokens.len() {
+            return left_node;
         }
+
+        match self.tokens[self.position] {
+            Tokens::OperatorAdd => {
+                self.advance();
+
+                let right_node = self.parse_expression();
+
+                return ASTNode::BinaryOperaion {
+                    left: Box::new(left_node),
+                    operator: "+".to_string(),
+                    right: Box::new(right_node),
+                };
+            }
+
+            Tokens::OperatorSubtract => {
+                self.advance();
+
+                let right_node = self.parse_expression();
+
+                return ASTNode::BinaryOperaion {
+                    left: Box::new(left_node),
+                    operator: "-".to_string(),
+                    right: Box::new(right_node),
+                };
+            }
+
+            Tokens::OperatorDivide => {
+                self.advance();
+
+                let right_node = self.parse_expression();
+
+                return ASTNode::BinaryOperaion {
+                    left: Box::new(left_node),
+                    operator: "/".to_string(),
+                    right: Box::new(right_node),
+                };
+            }
+
+            Tokens::OperatorMultiply => {
+                self.advance();
+
+                let right_node = self.parse_expression();
+
+                return ASTNode::BinaryOperaion {
+                    left: Box::new(left_node),
+                    operator: "*".to_string(),
+                    right: Box::new(right_node),
+                };
+            }
+            _ => {}
+        }
+
+        left_node
     }
 }

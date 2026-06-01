@@ -1,8 +1,8 @@
 #[derive(Debug, PartialEq, Clone)]
 // ============================================================================
-// DEVELOPMENT NOTE: 
+// DEVELOPMENT NOTE:
 // Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and 
+// The entire codebase has since been manually rewritten, refactored, and
 // engineered from scratch. Future development is entirely human-written.
 // ============================================================================
 pub enum Tokens {
@@ -18,7 +18,7 @@ pub enum Tokens {
     OperatorSpark,
     OperatorAdd,
     OperatorSubtract,
-    OperatorMultioply,
+    OperatorMultiply,
     OperatorDivide,
 
     BracketOpen,

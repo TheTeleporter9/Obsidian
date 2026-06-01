@@ -3,9 +3,9 @@ use std::fmt::format;
 use crate::AST::ASTNode;
 
 // ============================================================================
-// DEVELOPMENT NOTE: 
+// DEVELOPMENT NOTE:
 // Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and 
+// The entire codebase has since been manually rewritten, refactored, and
 // engineered from scratch. Future development is entirely human-written.
 // ============================================================================
 

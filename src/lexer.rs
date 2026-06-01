@@ -1,8 +1,8 @@
 use crate::tokens::Tokens::{self, VAR};
 // ============================================================================
-// DEVELOPMENT NOTE: 
+// DEVELOPMENT NOTE:
 // Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and 
+// The entire codebase has since been manually rewritten, refactored, and
 // engineered from scratch. Future development is entirely human-written.
 // ============================================================================
 pub struct Lexer {
@@ -101,7 +101,7 @@ impl Lexer {
             '=' => Some(Tokens::OperatorAssign),
             '+' => Some(Tokens::OperatorAdd),
             '-' => Some(Tokens::OperatorSubtract),
-            '*' => Some(Tokens::OperatorMultioply),
+            '*' => Some(Tokens::OperatorMultiply),
             '/' => Some(Tokens::OperatorDivide),
             '(' => Some(Tokens::BraceOpen),
             ')' => Some(Tokens::BraceClose),
