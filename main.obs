@@ -1,2 +1,2 @@
-var main = 4
+var main = 4 + 3 + 6 + 7
 print main
