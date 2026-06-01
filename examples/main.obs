@@ -1,6 +1,2 @@
-# THis is a super simple programming language, at the moment all features are shown here
-# Fore more detail look at the Spec.md file. There is shown an idea of where the lang is going
-# THIs is a way for me to learn rust!
-
-var main = 4 + 3 + 6 + 7
+var main = 4 + 6 + 13
 print main
