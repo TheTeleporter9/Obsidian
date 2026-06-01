@@ -1,9 +1,7 @@
 #include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
 
 int main() {
-    const int main = 4;
+    int main = (4 + (3 + (6 + 7)));
     printf("%d\n", main);
     return 0;
 }

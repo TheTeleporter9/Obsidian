@@ -30,11 +30,21 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         ASTNode::PrintDecleration { target } => {
             let target_text = convert_node_to_c_string(&*target);
             format!("printf(\"%d\\n\", {});", target_text)
-        },
+        }
 
         ASTNode::Identifier { name } => name.clone(),
 
-        ASTNode::LiteralInt{ value} => {value.to_string()},
+        ASTNode::LiteralInt { value } => value.to_string(),
+
+        ASTNode::BinaryOperaion {
+            left,
+            operator,
+            right,
+        } => {
+            let left_text = convert_node_to_c_string(&*left);
+            let right_text = convert_node_to_c_string(&*right);
+            format!("({} {} {})", left_text, operator, right_text)
+        }
         _ => panic!("Error at transpilation"),
     }
 }
