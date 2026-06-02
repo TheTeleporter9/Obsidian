@@ -80,6 +80,6 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             format!("{} = {}", name, val_text)
         }
 
-        _ => panic!("Error at transpilation"),
+        _ => panic!("Transpiler Error: Node type not implemented for transpilation: {:?}", node),
     }
 }
