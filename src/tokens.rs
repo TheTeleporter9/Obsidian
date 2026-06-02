@@ -20,6 +20,7 @@ pub enum Tokens {
     OperatorSubtract,
     OperatorMultiply,
     OperatorDivide,
+    OperatorSet, // the : to set stuff
 
     BracketOpen,
     BracketClose,
@@ -28,6 +29,8 @@ pub enum Tokens {
 
     TypeInt,
     TypeString,
+    TypeFloat,
+    TypeBoolean,
 
     ERROR,
     EOF,

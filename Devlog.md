@@ -5,3 +5,7 @@
 - **Challenges:** Navigating the initial logic flow was tough, but rewriting it manually helped me deeply understand the data structures, and using rust!
 
 - **Next Steps:** Moving entirely away from AI assistance to focus on pure manual feature implementation, DX experiance, Features adding!
+
+### Devlog #2: Re-ship with Binary Executable Release
+- Added a formal project description directly to the README.
+- Compiled the Rust codebase into a native release binary and published it via GitHub Releases to fulfill the executable demo requirement.

@@ -29,4 +29,12 @@ pub enum ASTNode {
     LiteralInt {
         value: i64,
     },
+
+    LiteralFloat {
+        value: f64,
+    },
+
+    LiteralBool {
+        value: bool,
+    }
 }

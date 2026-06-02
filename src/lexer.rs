@@ -77,6 +77,7 @@ impl Lexer {
                 continue;
             }
 
+            //Check if token matches a symbol
             if let Some(token) = self.check_for_symbol(current_char) {
                 self.tokens_out.push(token);
                 continue;
@@ -91,6 +92,9 @@ impl Lexer {
             "var" => Tokens::VAR,
             "print" => Tokens::PRINT,
             "func" => Tokens::FUNC,
+            "int" => Tokens::TypeInt,
+            "float" => Tokens::TypeFloat,
+            "bool" => Tokens::TypeBoolean,
 
             _ => Tokens::Identifier(string),
         }
@@ -105,6 +109,7 @@ impl Lexer {
             '/' => Some(Tokens::OperatorDivide),
             '(' => Some(Tokens::BraceOpen),
             ')' => Some(Tokens::BraceClose),
+            ':' => Some(Tokens::OperatorSet),
             _ => None,
         };
 

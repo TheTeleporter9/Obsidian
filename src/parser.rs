@@ -48,7 +48,8 @@ impl Parser {
 
     fn parse_variable_declaration(&mut self) -> ASTNode {
         self.advance(); // Skip VAR
-
+        
+        //Get vairable name
         let var_name = match &self.tokens[self.position] {
             Tokens::Identifier(name) => name.clone(),
             _ => panic!("Expected a valid variable name!"),
@@ -98,10 +99,10 @@ impl Parser {
             return left_node;
         }
 
+        //This is for LiteralInt type
         match self.tokens[self.position] {
             Tokens::OperatorAdd => {
                 self.advance();
-
                 let right_node = self.parse_expression();
 
                 return ASTNode::BinaryOperaion {
