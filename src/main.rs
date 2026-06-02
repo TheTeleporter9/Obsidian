@@ -1,4 +1,5 @@
 mod AST;
+mod DataType;
 mod lexer;
 mod parser;
 mod token_table;

@@ -1,3 +1,5 @@
+use crate::DataType;
+
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
 
@@ -10,6 +12,7 @@
 pub enum ASTNode {
     VariableDecleration {
         name: String,
+        var_type: DataType::VarType,
         value: Box<ASTNode>, //Makes shure that there can't be a memory overflow!
     },
 

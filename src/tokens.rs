@@ -33,6 +33,9 @@ pub enum Tokens {
     TypeFloat,
     TypeBoolean,
 
+    OptionTrue,
+    OptionFalse,
+
     ERROR,
     EOF,
 }

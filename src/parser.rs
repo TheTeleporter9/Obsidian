@@ -1,4 +1,5 @@
 use crate::AST::ASTNode;
+use crate::DataType;
 use crate::token_table::{self, variable_table};
 use crate::tokens::Tokens;
 
@@ -54,6 +55,13 @@ impl Parser {
     fn parse_variable_declaration(&mut self) -> ASTNode {
         self.advance(); // Skip VAR
 
+        let var_type = match &self.tokens[self.position] {
+            Tokens::TypeInt => DataType::VarType::Int,
+            Tokens::TypeFloat => DataType::VarType::Float,
+            Tokens::TypeBoolean => DataType::VarType::Bool,
+            _ => panic!("invalid type"),
+        };
+
         //Get vairable name
         let var_name = match &self.tokens[self.position] {
             Tokens::Identifier(name) => name.clone(),
@@ -73,12 +81,14 @@ impl Parser {
             &mut self.variable_table,
             ASTNode::VariableDecleration {
                 name: var_name.clone(),
+                var_type: var_type,
                 value: Box::new(value_node.clone()),
             },
         );
 
         ASTNode::VariableDecleration {
             name: var_name,
+            var_type: var_type,
             value: Box::new(value_node),
         }
     }
@@ -176,5 +186,15 @@ impl Parser {
 
     fn is_at_end(&self) -> bool {
         self.position >= self.tokens.len()
+    }
+
+    fn convert_str_datatype_to_datatype_vartype(&self, str_in: String) -> DataType::VarType {
+        match str_in.as_str() {
+            "int" => DataType::VarType::Int,
+            "float" => DataType::VarType::Float,
+            "bool" => DataType::VarType::Bool,
+
+            _ => panic!("DataType not matched!"),
+        }
     }
 }

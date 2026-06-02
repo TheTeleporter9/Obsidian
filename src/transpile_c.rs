@@ -1,4 +1,4 @@
-use crate::AST::ASTNode;
+use crate::{AST::ASTNode, DataType};
 
 // ============================================================================
 // DEVELOPMENT NOTE:
@@ -11,6 +11,7 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
     let mut c_code_output = String::new();
 
     c_code_output.push_str("#include <stdio.h>\n\n");
+    c_code_output.push_str("#include <stdbool.h>\n\n");
     c_code_output.push_str("int main() {\n");
 
     for node in ast_nodes {
@@ -31,10 +32,18 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
 fn convert_node_to_c_string(node: &ASTNode) -> String {
     match node {
-        ASTNode::VariableDecleration { name, value } => {
+        ASTNode::VariableDecleration {
+            name,
+            value,
+            var_type,
+        } => {
             let value_text = convert_node_to_c_string(&*value);
 
-            format!("int {} = {}", name, value_text)
+            match var_type {
+                DataType::VarType::Int => format!("int {} = {}", name, value_text),
+                DataType::VarType::Float => format!("float {} = {}", name, value_text),
+                DataType::VarType::Bool => format!("bool {} = {}", name, value_text),
+            }
         }
 
         ASTNode::PrintDecleration { target } => {

@@ -20,7 +20,11 @@ impl variable_table {
         //Make shure that variable_data is of type Vaiable Decleration!
         if !matches!(
             variable_data,
-            ASTNode::VariableDecleration { name: _, value: _ }
+            ASTNode::VariableDecleration {
+                name: _,
+                value: _,
+                var_type: _
+            }
         ) {
             panic!("Error at token_table! Parsed value is not of type VariableDecleration!");
         }
