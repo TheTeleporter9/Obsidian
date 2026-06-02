@@ -148,14 +148,14 @@ impl Parser {
                 let node = ASTNode::Identifier { name: name.clone() };
                 self.advance();
                 node
-            },
+            }
             Tokens::OptionFalse => {
                 self.advance();
                 ASTNode::LiteralBool { value: false }
-            },
+            }
             Tokens::OptionTrue => {
                 self.advance();
-                ASTNode::LiteralBool {value: true}
+                ASTNode::LiteralBool { value: true }
             }
             _ => panic!("Expected numeric literal or variable identifier"),
         }
@@ -163,8 +163,21 @@ impl Parser {
 
     /// Helper: Constructs a BinaryOperation node recursively.
     fn parse_binary_operation(&mut self, left: ASTNode) -> ASTNode {
+        let left_type = self.get_node_type(&left);
+
+        if left_type == DataType::VarType::Bool {
+            panic!("Type Error: Cannot use boolean variable n arithmetic expression");
+        }
+
         let operator_token = self.tokens[self.position].clone();
         self.advance();
+
+        let right_hand_side = self.parse_expression();
+        let right_type = self.get_node_type(&right_hand_side);
+
+        if right_type == DataType::VarType::Bool {
+            panic!("Type Error: Cannot use Boolean Variable in artihmetic expression")
+        }
 
         let right_hand_side = self.parse_expression();
 
@@ -213,6 +226,21 @@ impl Parser {
             }
 
             _ => panic!("Constraint Error: Boolean variables must be assigned 'true' or 'false'."),
+        }
+    }
+
+    fn get_node_type(&self, node: &ASTNode) -> DataType::VarType {
+        match node {
+            ASTNode::LiteralInt { .. } => DataType::VarType::Int,
+            ASTNode::LiteralBool { .. } => DataType::VarType::Bool,
+            ASTNode::Identifier { name } => {
+                // Use .expect() to turn the Option into the value, or crash with a helpful message
+                self.variable_table
+                    .get_type_by_name(name)
+                    .expect(&format!("Semantic Error: Variable '{}' not found.", name))
+            }
+            ASTNode::BinaryOperaion { left, .. } => self.get_node_type(left),
+            _ => panic!("Unknown node type"),
         }
     }
 }
