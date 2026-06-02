@@ -27,6 +27,49 @@ or with Binary:
 obsidian /path/to/program.obs
 ```
 
+## Language Syntax & Features
+Core Syntax
+is keywork driven
+
+## Strings currently do not exists, it will cause an error!
+
+```Variable Declaration: var <type> <name> = <value>```
+
+### Types:
+- #### bool -> either true or false (enforced)
+- #### int -> any hole number
+- #### float -> any fraction number
+
+``` Example: var int y = 4 ```
+
+#### Arithmetic Operations: +, -, *, /
+
+
+#### To send output use: ``` print <expression> ```
+### -> At the moment the print statment can't accept strings!
+
+Example Code
+Code snippet
+```
+# Hello World Program #
+var bool x = true
+var int y = 4
+var int z = 10
+
+# Arithmetic is permitted for numeric types #
+var int result = z + y - 9
+
+# Expressions can also be types wihtout needing a result var!#
+z + y - 3 * 5 / z
+# The first variable in the expression sequence will get the result assinged"
+
+# The same as: #
+z = z + y - 3 * 5 / z
+
+
+# Prints the numeric result #
+print result
+```
 Please note this behavior will change in future versions; this is an alpha build.
 
 ![Restult](images/example_output.png)

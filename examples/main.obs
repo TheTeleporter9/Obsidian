@@ -4,4 +4,6 @@ var bool x = true
 var int y = 4
 y - 9
 
+y = 10
+
 print x
