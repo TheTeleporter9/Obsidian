@@ -179,8 +179,6 @@ impl Parser {
             panic!("Type Error: Cannot use Boolean Variable in artihmetic expression")
         }
 
-        let right_hand_side = self.parse_expression();
-
         ASTNode::BinaryOperaion {
             left: Box::new(left),
             operator: self.map_token_to_string(operator_token),
