@@ -26,6 +26,11 @@ pub enum ASTNode {
         right: Box<ASTNode>,
     },
 
+    Assingment {
+        name: String,
+        value: Box<ASTNode>,
+    },
+
     Identifier {
         name: String,
     },

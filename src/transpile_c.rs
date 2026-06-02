@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use crate::{AST::ASTNode, DataType};
 
 // ============================================================================
@@ -71,6 +73,11 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             } else {
                 "false".to_string()
             }
+        }
+
+        ASTNode::Assingment { name, value } => {
+            let val_text = convert_node_to_c_string(&*value);
+            format!("{} = {}", name, val_text)
         }
 
         _ => panic!("Error at transpilation"),

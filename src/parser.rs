@@ -3,7 +3,7 @@ use std::mem::transmute;
 use crate::AST::ASTNode;
 use crate::DataType;
 use crate::token_table::{self};
-use crate::tokens::Tokens;
+use crate::tokens::Tokens::{self, Identifier};
 
 // ============================================================================
 // DEVELOPMENT NOTE:
@@ -43,8 +43,16 @@ impl Parser {
             let node = match &self.tokens[self.position] {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
-                Tokens::Identifier(_) | Tokens::LiteralInt(_) => self.parse_expression(),
-
+                Tokens::LiteralInt(_) => self.parse_expression(),
+                Tokens::Identifier(_) => {
+                    if self.position + 1 < self.tokens.len()
+                        && self.tokens[self.position + 1] == Tokens::OperatorAssign
+                    {
+                        self.parse_assigment() // Return the node, don't push it yet!
+                    } else {
+                        self.parse_expression() // Return the node
+                    }
+                }
                 _ => panic!("Unexpected Token! {:?}", &self.tokens[self.position]),
             };
 
@@ -183,6 +191,24 @@ impl Parser {
             left: Box::new(left),
             operator: self.map_token_to_string(operator_token),
             right: Box::new(right_hand_side),
+        }
+    }
+
+    fn parse_assigment(&mut self) -> ASTNode {
+        let name = match &self.tokens[self.position] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected identifier"),
+        };
+
+        self.advance();
+
+        //consume the '='
+        self.advance();
+        let value = self.parse_expression();
+
+        ASTNode::Assingment {
+            name,
+            value: Box::new(value),
         }
     }
 
