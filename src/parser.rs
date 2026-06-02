@@ -48,7 +48,7 @@ impl Parser {
 
     fn parse_variable_declaration(&mut self) -> ASTNode {
         self.advance(); // Skip VAR
-        
+
         //Get vairable name
         let var_name = match &self.tokens[self.position] {
             Tokens::Identifier(name) => name.clone(),

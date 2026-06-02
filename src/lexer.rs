@@ -21,11 +21,26 @@ impl Lexer {
     }
 
     pub fn tokenize(&mut self) {
+        let mut is_comment: bool = false;
+
         while self.current_index_pos < self.source.len() {
+
             let current_char = self.source[self.current_index_pos];
 
             //Step1: skip white spaces and comments
-            if current_char.is_whitespace() || current_char == '#' {
+            if current_char.is_whitespace() {
+                self.current_index_pos += 1;
+                continue;
+            }
+
+            //Make shure that the comment also gets closed, otherwise the entire code becomes a comment
+            if current_char == '#' {
+                is_comment = !is_comment;
+                self.current_index_pos += 1;
+                continue;
+            }
+
+            if is_comment {
                 self.current_index_pos += 1;
                 continue;
             }
@@ -84,6 +99,9 @@ impl Lexer {
             }
             panic!("Unexpected character: {}", current_char);
         }
+
+        println!("TONENIZATION FINISHED!");
+
     }
 
     fn check_if_keyword(&self, string: String) -> Tokens {

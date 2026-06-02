@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main() {
-    int main = (4 + (6 - 13));
-    printf("%d\n", main);
+    int hello = (1 - (3 * 5));
+    printf("%d\n", hello);
     return 0;
 }

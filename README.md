@@ -8,8 +8,7 @@
 ============================================================================
 
 ## What is Obsidian?
-## Description
-Obsidian is a high-level programming language designed to simplify low-level development by enforcing Object-Oriented Programming (OOP) design patterns. It operates as a source-to-source transpiler written in Rust that outputs standard C code. At the moment is the language still very rudementary and Simple!
+Obsidian is a high-level programming language designed to simplify low-level development by enforcing Object-Oriented Programming (OOP) design patterns. It operates as a source-to-source transpiler written in Rust that outputs standard C code. At the moment is the language still very rudementary and Simple as it is a learning experiance!
 
 ## How to run:
 First, download Rust.

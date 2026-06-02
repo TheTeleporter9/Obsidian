@@ -36,5 +36,7 @@ pub enum ASTNode {
 
     LiteralBool {
         value: bool,
-    }
+    },
+
+    NONE,
 }

@@ -52,6 +52,8 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             let right_text = convert_node_to_c_string(&*right);
             format!("({} {} {})", left_text, operator, right_text)
         }
+
+
         _ => panic!("Error at transpilation"),
     }
 }
