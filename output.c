@@ -1,8 +1,9 @@
 #include <stdio.h>
 
 int main() {
-    int hello = (1 - (3 * 5));
-    int bye = (hello + (5 / 10));
-    printf("%d\n", bye);
+   int x = 10;
+   int y = 4;
+   (x + (y - 9));
+   printf("%d\n", x);
     return 0;
 }

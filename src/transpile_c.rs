@@ -15,7 +15,12 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
     for node in ast_nodes {
         let c_line = convert_node_to_c_string(&node);
-        c_code_output.push_str(&format!("    {}\n", c_line));
+
+        if c_line.ends_with(';') || c_line.ends_with('{') {
+            c_code_output.push_str(&format!("   {}\n", c_line));
+        } else {
+            c_code_output.push_str(&format!("   {};\n", c_line));
+        }
     }
 
     c_code_output.push_str("    return 0;\n");
@@ -29,12 +34,12 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         ASTNode::VariableDecleration { name, value } => {
             let value_text = convert_node_to_c_string(&*value);
 
-            format!("int {} = {};", name, value_text)
+            format!("int {} = {}", name, value_text)
         }
 
         ASTNode::PrintDecleration { target } => {
             let target_text = convert_node_to_c_string(&*target);
-            format!("printf(\"%d\\n\", {});", target_text)
+            format!("printf(\"%d\\n\", {})", target_text)
         }
 
         ASTNode::Identifier { name } => name.clone(),

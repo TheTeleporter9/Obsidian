@@ -21,6 +21,7 @@ pub enum Tokens {
     OperatorMultiply,
     OperatorDivide,
     OperatorSet, // the : to set stuff
+    OperatorSemicolon,
 
     BracketOpen,
     BracketClose,
