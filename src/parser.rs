@@ -1,4 +1,5 @@
 use crate::AST::ASTNode;
+use crate::token_table::{self, variable_table};
 use crate::tokens::Tokens;
 
 // ============================================================================
@@ -10,6 +11,7 @@ use crate::tokens::Tokens;
 pub struct Parser {
     pub tokens: Vec<Tokens>,
     position: usize,
+    variable_table: token_table::variable_table,
 }
 
 impl Parser {
@@ -17,6 +19,7 @@ impl Parser {
         Self {
             tokens: input_tokens,
             position: 0,
+            variable_table: token_table::variable_table::new(),
         }
     }
 
@@ -31,13 +34,19 @@ impl Parser {
 
     pub fn parse(&mut self) -> Vec<ASTNode> {
         let mut program_nodes = Vec::new();
+        let mut variable_table: token_table::variable_table = variable_table::new();
 
         while self.position < self.tokens.len() {
+            println!("{:?}", &self.tokens[self.position]);
+
             let node = match &self.tokens[self.position] {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
+                Tokens::Identifier(_) => {
+                    self.parse_expression()
+                },
 
-                _ => panic!("Unexpected Token!"),
+                _ => panic!("Unexpected TOken! {:?}", &self.tokens[self.position])
             };
 
             program_nodes.push(node);
@@ -64,6 +73,14 @@ impl Parser {
 
         let value_node = self.parse_expression();
 
+        token_table::variable_table::add_variable_reference(
+            &mut self.variable_table,
+            ASTNode::VariableDecleration {
+                name: var_name.clone(),
+                value: Box::new(value_node.clone()),
+            },
+        );
+
         ASTNode::VariableDecleration {
             name: var_name,
             value: Box::new(value_node),
@@ -82,18 +99,21 @@ impl Parser {
 
     fn parse_expression(&mut self) -> ASTNode {
         let left_node = match &self.tokens[self.position] {
-            Tokens::LiteralInt(int_value) => {
-                let value = *int_value;
+            Tokens::LiteralInt(val) => {
+                let value = *val;
                 self.advance();
                 ASTNode::LiteralInt { value }
             }
-            Tokens::Identifier(identi_value) => {
-                let name = identi_value.clone();
-                self.advance();
-                ASTNode::Identifier { name }
+            Tokens::Identifier(name) => {
+                if !self.variable_table.check_variable_reference(self.tokens[self.position].clone()) {
+                    panic!("Variable '{}' is not defined!", name)
+                }
+
             }
-            _ => panic!("Expected integer or a variable"),
+            _ => panic!("Expected number or variable"),
         };
+
+
 
         if self.position >= self.tokens.len() {
             return left_node;

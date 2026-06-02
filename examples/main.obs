@@ -1,6 +1,7 @@
 #Hello world#
 
-var hello = 1 - 3 * 5
-var bye = hello + 5 / 10
-hello = bye + 10000
-print bye
+var x = 10
+var y = 4
+x + y - 9
+
+print x

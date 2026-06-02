@@ -1,4 +1,4 @@
-use crate::tokens::Tokens::{self, VAR};
+use crate::tokens::Tokens;
 // ============================================================================
 // DEVELOPMENT NOTE:
 // Initial logic for this system was drafted using AI pseudocode.
@@ -24,7 +24,6 @@ impl Lexer {
         let mut is_comment: bool = false;
 
         while self.current_index_pos < self.source.len() {
-
             let current_char = self.source[self.current_index_pos];
 
             //Step1: skip white spaces and comments
@@ -101,7 +100,6 @@ impl Lexer {
         }
 
         println!("TONENIZATION FINISHED!");
-
     }
 
     fn check_if_keyword(&self, string: String) -> Tokens {

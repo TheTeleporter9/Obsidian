@@ -1,7 +1,7 @@
 mod AST;
 mod lexer;
 mod parser;
-mod symbol_table;
+mod token_table;
 mod tokens;
 mod transpile_c;
 
@@ -51,9 +51,16 @@ fn main() -> io::Result<()> {
     let mut parser = Parser::new(lexer.tokens_out);
     let parser_out = parser.parse();
 
-    let c_out = transpile_to_c(parser_out);
+    let c_out = transpile_to_c(parser_out.clone());
 
     fs::write("output.c", c_out)?;
+
+    println!(
+        "++++++++++++++++++++++++++++++++++++Parser Output++++++++++++++++++++++++++++++++++++"
+    );
+    for node in parser_out {
+        println!("{:?}", node)
+    }
 
     println!("========== program output ==========\n");
 
