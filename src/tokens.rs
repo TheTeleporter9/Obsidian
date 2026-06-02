@@ -13,7 +13,6 @@ pub enum Tokens {
     VAR,
     PRINT,
     FUNC,
-    COMMENT,
 
     OperatorAssign,
     OperatorSpark,

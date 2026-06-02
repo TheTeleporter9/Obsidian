@@ -1,4 +1,5 @@
 #[derive(Debug, Clone)]
+#[warn(non_snake_case)]
 
 // ============================================================================
 // DEVELOPMENT NOTE:
