@@ -65,6 +65,10 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             format!("({} {} {})", left_text, operator, right_text)
         }
 
+        ASTNode::LiteralBool { value } => {
+            if *value {"true".to_string()} else {"false".to_string()}
+        }
+
         _ => panic!("Error at transpilation"),
     }
 }

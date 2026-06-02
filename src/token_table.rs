@@ -1,5 +1,6 @@
 use crate::{
     AST::{self, ASTNode},
+    DataType,
     tokens::Tokens,
 };
 
@@ -52,5 +53,21 @@ impl variable_table {
             (Tokens::Identifier(token_name), ASTNode::Identifier { name }) => token_name == name,
             _ => false,
         }
+    }
+
+    pub fn get_type_by_name(&self, name: &str) -> Option<DataType::VarType> {
+        for variable in &self.variables {
+            if let ASTNode::VariableDecleration {
+                name: var_name,
+                var_type,
+                ..
+            } = variable
+            {
+                if var_name == name {
+                    return Some(*var_type);
+                }
+            }
+        }
+        None
     }
 }

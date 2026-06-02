@@ -1,7 +1,9 @@
 #include <stdio.h>
 
+#include <stdbool.h>
+
 int main() {
-   int x = 10;
+   bool x = true;
    int y = 4;
    (x + (y - 9));
    printf("%d\n", x);

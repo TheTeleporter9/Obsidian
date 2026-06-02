@@ -112,6 +112,9 @@ impl Lexer {
             "float" => Tokens::TypeFloat,
             "bool" => Tokens::TypeBoolean,
 
+            "true" => Tokens::OptionTrue,
+            "false" => Tokens::OptionFalse,
+
             _ => Tokens::Identifier(string),
         }
     }

@@ -5,6 +5,7 @@ mod parser;
 mod token_table;
 mod tokens;
 mod transpile_c;
+mod type_checker;
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;

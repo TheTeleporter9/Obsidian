@@ -1,6 +1,8 @@
+use std::mem::transmute;
+
 use crate::AST::ASTNode;
 use crate::DataType;
-use crate::token_table::{self, variable_table};
+use crate::token_table::{self};
 use crate::tokens::Tokens;
 
 // ============================================================================
@@ -62,6 +64,8 @@ impl Parser {
             _ => panic!("invalid type"),
         };
 
+        self.advance();
+
         //Get vairable name
         let var_name = match &self.tokens[self.position] {
             Tokens::Identifier(name) => name.clone(),
@@ -76,6 +80,9 @@ impl Parser {
         }
 
         let value_node = self.parse_expression();
+        if var_type == DataType::VarType::Bool {
+            self.validate_bool_assignment(&value_node);
+        }
 
         token_table::variable_table::add_variable_reference(
             &mut self.variable_table,
@@ -141,6 +148,14 @@ impl Parser {
                 let node = ASTNode::Identifier { name: name.clone() };
                 self.advance();
                 node
+            },
+            Tokens::OptionFalse => {
+                self.advance();
+                ASTNode::LiteralBool { value: false }
+            },
+            Tokens::OptionTrue => {
+                self.advance();
+                ASTNode::LiteralBool {value: true}
             }
             _ => panic!("Expected numeric literal or variable identifier"),
         }
@@ -187,14 +202,17 @@ impl Parser {
     fn is_at_end(&self) -> bool {
         self.position >= self.tokens.len()
     }
+    fn validate_bool_assignment(&self, value_node: &ASTNode) {
+        match value_node {
+            ASTNode::LiteralBool { .. } => (),
 
-    fn convert_str_datatype_to_datatype_vartype(&self, str_in: String) -> DataType::VarType {
-        match str_in.as_str() {
-            "int" => DataType::VarType::Int,
-            "float" => DataType::VarType::Float,
-            "bool" => DataType::VarType::Bool,
+            ASTNode::Identifier { name } => {
+                if self.variable_table.get_type_by_name(name) != Some(DataType::VarType::Bool) {
+                    panic!("Type Error: Cannot assign non-boolean variable to boolean type.");
+                }
+            }
 
-            _ => panic!("DataType not matched!"),
+            _ => panic!("Constraint Error: Boolean variables must be assigned 'true' or 'false'."),
         }
     }
 }
