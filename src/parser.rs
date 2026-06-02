@@ -24,7 +24,6 @@ impl Parser {
     }
 
     //Helper functions
-    fn peek() {}
 
     fn advance(&mut self) {
         if self.position <= self.tokens.len() {
@@ -34,7 +33,6 @@ impl Parser {
 
     pub fn parse(&mut self) -> Vec<ASTNode> {
         let mut program_nodes = Vec::new();
-        let mut variable_table: token_table::variable_table = variable_table::new();
 
         while self.position < self.tokens.len() {
             println!("{:?}", &self.tokens[self.position]);
@@ -42,11 +40,9 @@ impl Parser {
             let node = match &self.tokens[self.position] {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
-                Tokens::Identifier(_) => {
-                    self.parse_expression()
-                },
+                Tokens::Identifier(_) | Tokens::LiteralInt(_) => self.parse_expression(),
 
-                _ => panic!("Unexpected TOken! {:?}", &self.tokens[self.position])
+                _ => panic!("Unexpected Token! {:?}", &self.tokens[self.position]),
             };
 
             program_nodes.push(node);
@@ -96,80 +92,89 @@ impl Parser {
             target: Box::new(target_node),
         };
     }
+    /// Entry point for parsing an expression.
+    pub fn parse_expression(&mut self) -> ASTNode {
+        let left_hand_side = self.parse_operand();
 
-    fn parse_expression(&mut self) -> ASTNode {
-        let left_node = match &self.tokens[self.position] {
+        if self.is_at_end() {
+            return left_hand_side;
+        }
+
+        if self.is_current_token_an_operator() {
+            return self.parse_binary_operation(left_hand_side);
+        }
+
+        left_hand_side
+    }
+
+    /// Helper: Determines if the current token is a math operator.
+    fn is_current_token_an_operator(&self) -> bool {
+        matches!(
+            self.tokens[self.position],
+            Tokens::OperatorAdd
+                | Tokens::OperatorSubtract
+                | Tokens::OperatorMultiply
+                | Tokens::OperatorDivide
+        )
+    }
+
+    /// Helper: Handles the left-side of an expression (Literals or Variables).
+    fn parse_operand(&mut self) -> ASTNode {
+        match &self.tokens[self.position] {
             Tokens::LiteralInt(val) => {
-                let value = *val;
+                let node = ASTNode::LiteralInt { value: *val };
                 self.advance();
-                ASTNode::LiteralInt { value }
+                node
             }
             Tokens::Identifier(name) => {
-                if !self.variable_table.check_variable_reference(self.tokens[self.position].clone()) {
-                    panic!("Variable '{}' is not defined!", name)
-                }
-
+                self.validate_variable_existence(name);
+                let node = ASTNode::Identifier { name: name.clone() };
+                self.advance();
+                node
             }
-            _ => panic!("Expected number or variable"),
-        };
-
-
-
-        if self.position >= self.tokens.len() {
-            return left_node;
+            _ => panic!("Expected numeric literal or variable identifier"),
         }
+    }
 
-        //This is for LiteralInt type
-        match self.tokens[self.position] {
-            Tokens::OperatorAdd => {
-                self.advance();
-                let right_node = self.parse_expression();
+    /// Helper: Constructs a BinaryOperation node recursively.
+    fn parse_binary_operation(&mut self, left: ASTNode) -> ASTNode {
+        let operator_token = self.tokens[self.position].clone();
+        self.advance();
 
-                return ASTNode::BinaryOperaion {
-                    left: Box::new(left_node),
-                    operator: "+".to_string(),
-                    right: Box::new(right_node),
-                };
-            }
+        let right_hand_side = self.parse_expression();
 
-            Tokens::OperatorSubtract => {
-                self.advance();
-
-                let right_node = self.parse_expression();
-
-                return ASTNode::BinaryOperaion {
-                    left: Box::new(left_node),
-                    operator: "-".to_string(),
-                    right: Box::new(right_node),
-                };
-            }
-
-            Tokens::OperatorDivide => {
-                self.advance();
-
-                let right_node = self.parse_expression();
-
-                return ASTNode::BinaryOperaion {
-                    left: Box::new(left_node),
-                    operator: "/".to_string(),
-                    right: Box::new(right_node),
-                };
-            }
-
-            Tokens::OperatorMultiply => {
-                self.advance();
-
-                let right_node = self.parse_expression();
-
-                return ASTNode::BinaryOperaion {
-                    left: Box::new(left_node),
-                    operator: "*".to_string(),
-                    right: Box::new(right_node),
-                };
-            }
-            _ => {}
+        ASTNode::BinaryOperaion {
+            left: Box::new(left),
+            operator: self.map_token_to_string(operator_token),
+            right: Box::new(right_hand_side),
         }
+    }
 
-        left_node
+    /// Helper: Validates if a variable exists in the registry.
+    fn validate_variable_existence(&self, name: &str) {
+        if !self
+            .variable_table
+            .check_variable_reference(&self.tokens[self.position])
+        {
+            panic!(
+                "Semantic Error: Variable '{}' is referenced before declaration.",
+                name
+            );
+        }
+    }
+
+    /// Helper: Converts token enum to a string representation.
+    fn map_token_to_string(&self, token: Tokens) -> String {
+        match token {
+            Tokens::OperatorAdd => "+".to_string(),
+            Tokens::OperatorSubtract => "-".to_string(),
+            Tokens::OperatorMultiply => "*".to_string(),
+            Tokens::OperatorDivide => "/".to_string(),
+            _ => unreachable!(),
+        }
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.position >= self.tokens.len()
     }
 }

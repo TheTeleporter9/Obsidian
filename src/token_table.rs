@@ -24,25 +24,28 @@ impl variable_table {
         ) {
             panic!("Error at token_table! Parsed value is not of type VariableDecleration!");
         }
-
+        println!("t_t-v_t: New variable added: {:?}", &variable_data);
         self.variables.push(variable_data);
     }
 
-    pub fn check_variable_reference(&mut self, checking_token: Tokens) -> ASTNode {
-        for variable in self.variables.clone() {
-            if variable_table::var_name_match(&checking_token, &variable) {
-                return variable;
+    pub fn check_variable_reference(&self, checking_token: &Tokens) -> bool {
+        for variable in &self.variables {
+            println!("t_t-v_t: check variable reference {:?}", variable);
+            if variable_table::var_name_match(checking_token, variable) {
+                println!("t_t-v_t: variable {:?} found and exist!", checking_token);
+                return true; // Found it!
             }
         }
-
-        ASTNode::NONE
+        false // Not found
     }
-    
-    fn var_name_match(token: &Tokens, node: &ASTNode) -> bool {
+
+    pub fn var_name_match(token: &Tokens, node: &ASTNode) -> bool {
         match (token, node) {
-            (Tokens::Identifier(token_name), ASTNode::Identifier { name, .. }) => {
+            (Tokens::Identifier(token_name), ASTNode::VariableDecleration { name, .. }) => {
                 token_name == name
             }
+
+            (Tokens::Identifier(token_name), ASTNode::Identifier { name }) => token_name == name,
             _ => false,
         }
     }
