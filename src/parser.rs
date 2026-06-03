@@ -43,6 +43,7 @@ impl Parser {
             let node = match &self.tokens[self.position] {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
+                Tokens::FUNC => self.parse_funtion_declaration(),
                 Tokens::LiteralInt(_) => self.parse_expression(),
                 Tokens::Identifier(_) => {
                     if self.position + 1 < self.tokens.len()
@@ -104,6 +105,48 @@ impl Parser {
         ASTNode::VariableDecleration {
             name: var_name,
             var_type: var_type,
+            value: Box::new(value_node),
+        }
+    }
+
+    fn parse_funtion_declaration(&mut self) -> ASTNode {
+        let return_type = match &self.tokens[self.position] {
+            Tokens::TypeInt => DataType::VarType::Int,
+            Tokens::TypeFloat => DataType::VarType::Float,
+            Tokens::TypeBoolean => DataType::VarType::Bool,
+            _ => panic!("Invalid return type"),
+        };
+
+        self.advance();
+
+        // Get function name
+        let function_name = match &self.tokens[self.position] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected a valid function name!"),
+        };
+
+        self.advance(); // Skip identifier
+
+        match &self.tokens[self.position] {
+            Tokens::OperatorAssign => self.advance(),
+            _ => panic!("Expected an '=' in function declaration"),
+        }
+
+        let value_node = self.parse_expression();
+
+        if return_type == DataType::VarType::Bool {
+            self.validate_bool_assignment(&value_node);
+        }
+
+            token_table::FunctionTable::add_function_reference(ASTNode::FunctionDecleration {
+                name: function_name.clone(),
+                return_type,
+                value: Box::new(value_node.clone()),
+            });
+
+        ASTNode::FunctionDecleration {
+            name: function_name,
+            return_type,
             value: Box::new(value_node),
         }
     }

@@ -5,14 +5,12 @@ use crate::{
 };
 
 pub struct variable_table {
-    index: i32,
     variables: Vec<ASTNode>,
 }
 
 impl variable_table {
     pub fn new() -> Self {
         Self {
-            index: 0,
             variables: Vec::new(),
         }
     }
@@ -69,5 +67,71 @@ impl variable_table {
             }
         }
         None
+    }
+}
+pub struct FunctionTable {
+    functions: Vec<ASTNode>,
+}
+
+impl FunctionTable {
+    pub fn new() -> Self {
+        Self {
+            functions: Vec::new(),
+        }
+    }
+
+    pub fn add_function_reference(&mut self, function_data: ASTNode) {
+        // Make sure that function_data is of type FunctionDeclaration!
+        if !matches!(
+            function_data,
+            ASTNode::FunctionDecleration {
+                name: _,
+                return_type: _,
+                parameters: _,
+                body: _,
+                return_value: _,
+            
+            }
+        ) {
+            panic!("Error at function_table! Parsed value is not of type FunctionDecleration!");
+        }
+
+        println!("t_t-f_t: New function added: {:?}", &function_data);
+        self.functions.push(function_data);
+    }
+
+    pub fn check_function_reference(&self, checking_token: &Tokens) -> bool {
+        for function in &self.functions {
+            println!("t_t-f_t: check function reference {:?}", function);
+
+            if Self::func_name_match(checking_token, function) {
+                println!("t_t-f_t: function {:?} found and exists!", checking_token);
+                return true;
+            }
+        }
+
+        false
+    }
+
+    pub fn func_name_match(token: &Tokens, node: &ASTNode) -> bool {
+        match (token, node) {
+            (Tokens::Identifier(token_name), ASTNode::FunctionDecleration { name, .. }) => {
+                token_name == name
+            }
+
+            _ => false,
+        }
+    }
+
+    pub fn get_type_by_name(&self, name: &str) -> Option<DataType::VarType> {
+        self.functions.iter().find_map(|function| match function {
+            ASTNode::FunctionDecleration {
+                name: func_name,
+                return_type,
+                ..
+            } if func_name == name => Some(*return_type),
+
+            _ => None,
+        })
     }
 }
