@@ -110,45 +110,26 @@ impl Parser {
     }
 
     fn parse_funtion_declaration(&mut self) -> ASTNode {
-        let return_type = match &self.tokens[self.position] {
+        self.advance(); //skip func keyword
+
+        //check if function has a valid type
+
+        let func_type = match &self.tokens[self.position] {
             Tokens::TypeInt => DataType::VarType::Int,
-            Tokens::TypeFloat => DataType::VarType::Float,
+            Tokens::TypeInt => DataType::VarType::Int,
             Tokens::TypeBoolean => DataType::VarType::Bool,
-            _ => panic!("Invalid return type"),
+            _ => panic!("{:?} Invalid type for Function return!", &self.tokens[self.position])
         };
 
+        //skip Identifier
         self.advance();
 
-        // Get function name
-        let function_name = match &self.tokens[self.position] {
-            Tokens::Identifier(name) => name.clone(),
-            _ => panic!("Expected a valid function name!"),
-        };
+        
 
-        self.advance(); // Skip identifier
 
-        match &self.tokens[self.position] {
-            Tokens::OperatorAssign => self.advance(),
-            _ => panic!("Expected an '=' in function declaration"),
-        }
 
-        let value_node = self.parse_expression();
 
-        if return_type == DataType::VarType::Bool {
-            self.validate_bool_assignment(&value_node);
-        }
-
-            token_table::FunctionTable::add_function_reference(ASTNode::FunctionDecleration {
-                name: function_name.clone(),
-                return_type,
-                value: Box::new(value_node.clone()),
-            });
-
-        ASTNode::FunctionDecleration {
-            name: function_name,
-            return_type,
-            value: Box::new(value_node),
-        }
+    
     }
 
     fn parse_print_statement(&mut self) -> ASTNode {
