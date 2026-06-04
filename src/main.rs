@@ -50,6 +50,10 @@ fn main() -> io::Result<()> {
     println!("Starting lexer");
     lexer.tokenize();
 
+    for token in lexer.tokens_out.clone() {
+        println!("Current Token: {:?}", token)
+    }
+
     let mut parser = Parser::new(lexer.tokens_out);
     let parser_out = parser.parse();
 

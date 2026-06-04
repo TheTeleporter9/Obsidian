@@ -23,10 +23,13 @@ pub enum Tokens {
     OperatorSet, // the : to set stuff
     OperatorSemicolon,
 
-    BracketOpen,
+    BracketOpen, //{}
     BracketClose,
-    BraceOpen,
+    BraceOpen, //()
     BraceClose,
+    SquareBracketOpen, //[]
+    SquareBracketClose,
+    Comma,
 
     TypeInt,
     TypeString,

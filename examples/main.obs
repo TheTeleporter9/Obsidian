@@ -7,3 +7,16 @@ y - 9
 y = 10
 
 print x
+
+
+func int multiplyAndAdd {
+    [int a, int b]
+
+    var int product = a * b
+    var int result = product + 10
+    
+}(result)
+
+var int answer = multiplyAndAdd[5, 3]
+
+print answer

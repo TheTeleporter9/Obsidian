@@ -21,9 +21,8 @@ pub enum ASTNode {
         return_type: DataType::VarType,
         parameters: Vec<FunctionParameter>,
         body: Vec<ASTNode>,
-        return_value: Box<ASTNode>
+        return_value: Box<ASTNode>,
     },
-
 
     PrintDecleration {
         target: Box<ASTNode>,
@@ -59,10 +58,9 @@ pub enum ASTNode {
     NONE,
 }
 
-
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
 pub struct FunctionParameter {
     pub name: String,
-    pub param_type: DataType::VarType
+    pub param_type: DataType::VarType,
 }

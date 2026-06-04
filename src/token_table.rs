@@ -5,13 +5,25 @@ use crate::{
 };
 
 pub struct variable_table {
-    variables: Vec<ASTNode>,
+    scopes: Vec<Vec<ASTNode>>,
 }
 
 impl variable_table {
     pub fn new() -> Self {
         Self {
-            variables: Vec::new(),
+            scopes: vec![Vec::new()],
+        }
+    }
+
+    pub fn push_scope(&mut self) {
+        self.scopes.push(Vec::new());
+    }
+
+    pub fn pop_scope(&mut self) {
+        if self.scopes.len() > 1 {
+            self.scopes.pop();
+        } else {
+            panic!("Cannot pop global scope")
         }
     }
 
@@ -28,17 +40,20 @@ impl variable_table {
             panic!("Error at token_table! Parsed value is not of type VariableDecleration!");
         }
         println!("t_t-v_t: New variable added: {:?}", &variable_data);
-        self.variables.push(variable_data);
+        self.scopes.last_mut().unwrap().push(variable_data);
     }
 
     pub fn check_variable_reference(&self, checking_token: &Tokens) -> bool {
-        for variable in &self.variables {
-            println!("t_t-v_t: check variable reference {:?}", variable);
-            if variable_table::var_name_match(checking_token, variable) {
-                println!("t_t-v_t: variable {:?} found and exist!", checking_token);
-                return true; // Found it!
+        for scope in self.scopes.iter().rev() {
+            for variable in scope {
+                println!("t_t-v_t: check variable reference {:?}", variable);
+                if variable_table::var_name_match(checking_token, variable) {
+                    println!("t_t-v_t: variable {:?} found and exist!", checking_token);
+                    return true; // Found it!
+                }
             }
         }
+
         false // Not found
     }
 
@@ -54,18 +69,21 @@ impl variable_table {
     }
 
     pub fn get_type_by_name(&self, name: &str) -> Option<DataType::VarType> {
-        for variable in &self.variables {
-            if let ASTNode::VariableDecleration {
-                name: var_name,
-                var_type,
-                ..
-            } = variable
-            {
-                if var_name == name {
-                    return Some(*var_type);
+        for scope in self.scopes.iter().rev() {
+            for variable in scope {
+                if let ASTNode::VariableDecleration {
+                    name: var_name,
+                    var_type,
+                    ..
+                } = variable
+                {
+                    if var_name == name {
+                        return Some(*var_type);
+                    }
                 }
             }
         }
+
         None
     }
 }
@@ -90,7 +108,6 @@ impl FunctionTable {
                 parameters: _,
                 body: _,
                 return_value: _,
-            
             }
         ) {
             panic!("Error at function_table! Parsed value is not of type FunctionDecleration!");

@@ -23,6 +23,8 @@ impl Lexer {
     pub fn tokenize(&mut self) {
         let mut is_comment: bool = false;
 
+        println!("STARING TONENIZATION!");
+
         while self.current_index_pos < self.source.len() {
             let current_char = self.source[self.current_index_pos];
 
@@ -129,6 +131,11 @@ impl Lexer {
             '(' => Some(Tokens::BraceOpen),
             ')' => Some(Tokens::BraceClose),
             ':' => Some(Tokens::OperatorSet),
+            '{' => Some(Tokens::BracketOpen),
+            '}' => Some(Tokens::BracketClose),
+            '[' => Some(Tokens::SquareBracketOpen),
+            ']' => Some(Tokens::SquareBracketClose),
+            ',' => Some(Tokens::Comma),
             _ => None,
         };
 

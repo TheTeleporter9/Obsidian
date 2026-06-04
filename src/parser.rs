@@ -1,6 +1,6 @@
 use std::mem::transmute;
 
-use crate::AST::ASTNode;
+use crate::AST::{ASTNode, FunctionParameter};
 use crate::DataType;
 use crate::token_table::{self};
 use crate::tokens::Tokens::{self, Identifier};
@@ -43,7 +43,7 @@ impl Parser {
             let node = match &self.tokens[self.position] {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
-                Tokens::FUNC => self.parse_funtion_declaration(),
+                Tokens::FUNC => self.parse_function_decleration(),
                 Tokens::LiteralInt(_) => self.parse_expression(),
                 Tokens::Identifier(_) => {
                     if self.position + 1 < self.tokens.len()
@@ -109,29 +109,143 @@ impl Parser {
         }
     }
 
-    fn parse_funtion_declaration(&mut self) -> ASTNode {
-        self.advance(); //skip func keyword
+pub fn parse_function_decleration(&mut self) -> ASTNode {
+    self.advance(); // skip FUNC
 
-        //check if function has a valid type
+    let return_type = match &self.tokens[self.position] {
+        Tokens::TypeInt => DataType::VarType::Int,
+        Tokens::TypeFloat => DataType::VarType::Float,
+        Tokens::TypeBoolean => DataType::VarType::Bool,
+        _ => panic!("Expected return type"),
+    };
 
-        let func_type = match &self.tokens[self.position] {
-            Tokens::TypeInt => DataType::VarType::Int,
-            Tokens::TypeInt => DataType::VarType::Int,
-            Tokens::TypeBoolean => DataType::VarType::Bool,
-            _ => panic!("{:?} Invalid type for Function return!", &self.tokens[self.position])
-        };
+    self.advance();
 
-        //skip Identifier
-        self.advance();
+    let function_name = match &self.tokens[self.position] {
+        Tokens::Identifier(name) => name.clone(),
+        _ => panic!("Expected function name"),
+    };
 
-        
+    self.advance();
 
-
-
-
-    
+    match &self.tokens[self.position] {
+        Tokens::BracketOpen => self.advance(),
+        _ => panic!("Expected '{{'"),
     }
 
+    let parameters = self.parse_parameter_list();
+
+    self.variable_table.push_scope();
+
+    for parameter in &parameters {
+        self.variable_table.add_variable_reference(ASTNode::VariableDecleration {
+            name: parameter.name.clone(),
+            var_type: parameter.param_type,
+            value: Box::new(ASTNode::NONE),
+        });
+    }
+
+    let mut body = Vec::new();
+
+    while self.position < self.tokens.len()
+        && !matches!(self.tokens[self.position], Tokens::BracketClose)
+    {
+        body.push(self.parse_statement());
+    }
+
+    if matches!(self.tokens[self.position], Tokens::BracketClose) {
+        self.advance();
+    } else {
+        panic!("Expected '}}'");
+    }
+
+    match &self.tokens[self.position] {
+        Tokens::BraceOpen => self.advance(),
+        _ => panic!("Expected '('"),
+    }
+
+    let return_value = self.parse_expression();
+
+    match &self.tokens[self.position] {
+        Tokens::BraceClose => self.advance(),
+        _ => panic!("Expected ')'")
+    }
+
+    self.variable_table.pop_scope();
+
+    ASTNode::FunctionDecleration {
+        name: function_name,
+        return_type,
+        parameters,
+        body,
+        return_value: Box::new(return_value),
+    }
+}
+    pub fn parse_parameter_list(&mut self) -> Vec<FunctionParameter> {
+        let mut parameters = Vec::new();
+
+        // Expect '['
+        match &self.tokens[self.position] {
+            Tokens::SquareBracketOpen => self.advance(),
+            _ => panic!("Expected '[' to begin parameter list"),
+        }
+
+        // Handle empty parameter list: []
+        if matches!(self.tokens[self.position], Tokens::SquareBracketClose) {
+            self.advance();
+            return parameters;
+        }
+
+        loop {
+            // Parse parameter type
+            let param_type = match &self.tokens[self.position] {
+                Tokens::TypeInt => {
+                    self.advance();
+                    DataType::VarType::Int
+                }
+                Tokens::TypeFloat => {
+                    self.advance();
+                    DataType::VarType::Float
+                }
+                Tokens::TypeBoolean => {
+                    self.advance();
+                    DataType::VarType::Bool
+                }
+                _ => panic!("Expected parameter type"),
+            };
+
+            // Parse parameter name
+            let param_name = match &self.tokens[self.position] {
+                Tokens::Identifier(name) => {
+                    let name = name.clone();
+                    self.advance();
+                    name
+                }
+                _ => panic!("Expected parameter name"),
+            };
+
+            parameters.push(FunctionParameter {
+                name: param_name,
+                param_type,
+            });
+
+            // Either ',' or ']'
+            match &self.tokens[self.position] {
+                Tokens::Comma => {
+                    self.advance();
+                }
+
+                Tokens::SquareBracketClose => {
+                    self.advance();
+                    break;
+                }
+
+                _ => panic!("Expected ',' or ']' in parameter list"),
+            }
+        }
+
+        parameters
+    }
     fn parse_print_statement(&mut self) -> ASTNode {
         self.advance();
 
@@ -233,6 +347,28 @@ impl Parser {
         ASTNode::Assingment {
             name,
             value: Box::new(value),
+        }
+    }
+
+    fn parse_statement(&mut self) -> ASTNode {
+        match &self.tokens[self.position] {
+            Tokens::VAR => self.parse_variable_declaration(),
+            Tokens::PRINT => self.parse_print_statement(),
+            Tokens::Identifier(_) => {
+                if self.position + 1 < self.tokens.len()
+                    && self.tokens[self.position + 1] == Tokens::OperatorAssign
+                {
+                    self.parse_assigment()
+                } else {
+                    self.parse_expression()
+                }
+            }
+            Tokens::LiteralInt(_) => self.parse_expression(),
+            Tokens::OptionTrue | Tokens::OptionFalse => self.parse_expression(),
+            _ => panic!(
+                "Unexpected token in statement: {:?}",
+                self.tokens[self.position]
+            ),
         }
     }
 
