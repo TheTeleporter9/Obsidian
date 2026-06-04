@@ -1,0 +1,29 @@
+{
+    "scopeName": "source.obsidian",
+    "patterns": [
+        {
+            "name": "keyword.control.obsidian",
+            "match": "\\b(func|var|print)\\b"
+        },
+        {
+            "name": "storage.type.obsidian",
+            "match": "\\b(int|float|bool)\\b"
+        },
+        {
+            "name": "constant.language.boolean.obsidian",
+            "match": "\\b(true|false)\\b"
+        },
+        {
+            "name": "constant.numeric.obsidian",
+            "match": "\\b\\d+\\b"
+        },
+        {
+            "name": "keyword.operator.obsidian",
+            "match": "[+\\-*/=]"
+        },
+        {
+            "name": "entity.name.function.obsidian",
+            "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\[)"
+        }
+    ]
+}
