@@ -24,6 +24,11 @@ pub enum ASTNode {
         return_value: Box<ASTNode>,
     },
 
+    FunctionCall {
+        name: String,
+        arguments: Vec<ASTNode>,
+    },
+
     PrintDecleration {
         target: Box<ASTNode>,
     },

@@ -15,6 +15,7 @@ pub struct Parser {
     pub tokens: Vec<Tokens>,
     position: usize,
     variable_table: token_table::variable_table,
+    function_table: token_table::FunctionTable,
 }
 
 impl Parser {
@@ -23,6 +24,7 @@ impl Parser {
             tokens: input_tokens,
             position: 0,
             variable_table: token_table::variable_table::new(),
+            function_table: token_table::FunctionTable::new(),
         }
     }
 
@@ -109,78 +111,83 @@ impl Parser {
         }
     }
 
-pub fn parse_function_decleration(&mut self) -> ASTNode {
-    self.advance(); // skip FUNC
+    pub fn parse_function_decleration(&mut self) -> ASTNode {
+        self.advance(); // skip FUNC
 
-    let return_type = match &self.tokens[self.position] {
-        Tokens::TypeInt => DataType::VarType::Int,
-        Tokens::TypeFloat => DataType::VarType::Float,
-        Tokens::TypeBoolean => DataType::VarType::Bool,
-        _ => panic!("Expected return type"),
-    };
+        let return_type = match &self.tokens[self.position] {
+            Tokens::TypeInt => DataType::VarType::Int,
+            Tokens::TypeFloat => DataType::VarType::Float,
+            Tokens::TypeBoolean => DataType::VarType::Bool,
+            _ => panic!("Expected return type"),
+        };
 
-    self.advance();
-
-    let function_name = match &self.tokens[self.position] {
-        Tokens::Identifier(name) => name.clone(),
-        _ => panic!("Expected function name"),
-    };
-
-    self.advance();
-
-    match &self.tokens[self.position] {
-        Tokens::BracketOpen => self.advance(),
-        _ => panic!("Expected '{{'"),
-    }
-
-    let parameters = self.parse_parameter_list();
-
-    self.variable_table.push_scope();
-
-    for parameter in &parameters {
-        self.variable_table.add_variable_reference(ASTNode::VariableDecleration {
-            name: parameter.name.clone(),
-            var_type: parameter.param_type,
-            value: Box::new(ASTNode::NONE),
-        });
-    }
-
-    let mut body = Vec::new();
-
-    while self.position < self.tokens.len()
-        && !matches!(self.tokens[self.position], Tokens::BracketClose)
-    {
-        body.push(self.parse_statement());
-    }
-
-    if matches!(self.tokens[self.position], Tokens::BracketClose) {
         self.advance();
-    } else {
-        panic!("Expected '}}'");
+
+        let function_name = match &self.tokens[self.position] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected function name"),
+        };
+
+        self.advance();
+
+        match &self.tokens[self.position] {
+            Tokens::BracketOpen => self.advance(),
+            _ => panic!("Expected '{{'"),
+        }
+
+        let parameters = self.parse_parameter_list();
+
+        self.variable_table.push_scope();
+
+        for parameter in &parameters {
+            self.variable_table
+                .add_variable_reference(ASTNode::VariableDecleration {
+                    name: parameter.name.clone(),
+                    var_type: parameter.param_type,
+                    value: Box::new(ASTNode::NONE),
+                });
+        }
+
+        let mut body = Vec::new();
+
+        while self.position < self.tokens.len()
+            && !matches!(self.tokens[self.position], Tokens::BracketClose)
+        {
+            body.push(self.parse_statement());
+        }
+
+        if matches!(self.tokens[self.position], Tokens::BracketClose) {
+            self.advance();
+        } else {
+            panic!("Expected '}}'");
+        }
+
+        match &self.tokens[self.position] {
+            Tokens::BraceOpen => self.advance(),
+            _ => panic!("Expected '('"),
+        }
+
+        let return_value = self.parse_expression();
+
+        match &self.tokens[self.position] {
+            Tokens::BraceClose => self.advance(),
+            _ => panic!("Expected ')'"),
+        }
+
+        self.variable_table.pop_scope();
+
+        let node = ASTNode::FunctionDecleration {
+            name: function_name,
+            return_type,
+            parameters,
+            body,
+            return_value: Box::new(return_value),
+        };
+
+        self.function_table.add_function_reference(node.clone());
+
+        node
     }
-
-    match &self.tokens[self.position] {
-        Tokens::BraceOpen => self.advance(),
-        _ => panic!("Expected '('"),
-    }
-
-    let return_value = self.parse_expression();
-
-    match &self.tokens[self.position] {
-        Tokens::BraceClose => self.advance(),
-        _ => panic!("Expected ')'")
-    }
-
-    self.variable_table.pop_scope();
-
-    ASTNode::FunctionDecleration {
-        name: function_name,
-        return_type,
-        parameters,
-        body,
-        return_value: Box::new(return_value),
-    }
-}
     pub fn parse_parameter_list(&mut self) -> Vec<FunctionParameter> {
         let mut parameters = Vec::new();
 
@@ -246,6 +253,37 @@ pub fn parse_function_decleration(&mut self) -> ASTNode {
 
         parameters
     }
+
+    fn parse_function_call(&mut self) -> ASTNode {
+        let function_name = match &self.tokens[self.position] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected function name"),
+        };
+
+        self.advance(); // consume function name
+
+        match &self.tokens[self.position] {
+            Tokens::SquareBracketOpen => self.advance(),
+            _ => panic!("Expected '['"),
+        }
+
+        let mut arguments = Vec::new();
+
+        while !matches!(self.tokens[self.position], Tokens::SquareBracketClose) {
+            arguments.push(self.parse_expression());
+
+            if matches!(self.tokens[self.position], Tokens::Comma) {
+                self.advance();
+            }
+        }
+
+        self.advance(); // consume ']'
+
+        ASTNode::FunctionCall {
+            name: function_name,
+            arguments,
+        }
+    }
     fn parse_print_statement(&mut self) -> ASTNode {
         self.advance();
 
@@ -290,9 +328,18 @@ pub fn parse_function_decleration(&mut self) -> ASTNode {
                 node
             }
             Tokens::Identifier(name) => {
+                if self.position + 1 < self.tokens.len()
+                    && matches!(self.tokens[self.position + 1], Tokens::SquareBracketOpen)
+                {
+                    return self.parse_function_call();
+                }
+
                 self.validate_variable_existence(name);
+
                 let node = ASTNode::Identifier { name: name.clone() };
+
                 self.advance();
+
                 node
             }
             Tokens::OptionFalse => {
