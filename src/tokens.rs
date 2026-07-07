@@ -42,3 +42,13 @@ pub enum Tokens {
     ERROR,
     EOF,
 }
+
+
+impl Tokens {
+    fn identifier_in_to_string(self) -> Option<String> {
+        match self {
+            Tokens::Identifier(s) => Some(s),
+            _ => None,
+        }
+    }
+}
