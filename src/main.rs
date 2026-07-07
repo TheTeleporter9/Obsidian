@@ -1,14 +1,15 @@
 mod AST;
 mod DataType;
 mod lexer;
-mod parser;
+mod old_parser;
 mod token_table;
 mod tokens;
 mod transpile_c;
 mod type_checker;
+mod parsing;
 
 use crate::lexer::Lexer;
-use crate::parser::Parser;
+use crate::old_parser::Parser;
 use crate::transpile_c::transpile_to_c;
 use std::{env, fs, io, path::PathBuf, process::Command};
 
