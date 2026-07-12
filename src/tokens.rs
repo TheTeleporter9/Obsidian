@@ -1,10 +1,4 @@
 #[derive(Debug, PartialEq, Clone)]
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 pub enum Tokens {
     Identifier(String),
     LiteralInt(i64),
@@ -43,12 +37,26 @@ pub enum Tokens {
     EOF,
 }
 
+#[derive(Clone, Debug)]
+pub enum BinaryOperator {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Assign,
+}
 
-impl Tokens {
-    fn identifier_in_to_string(self) -> Option<String> {
-        match self {
-            Tokens::Identifier(s) => Some(s),
-            _ => None,
+impl TryFrom<&Tokens> for BinaryOperator {
+    type Error = ();
+
+    fn try_from(token: &Tokens) -> Result<Self, Self::Error> {
+        match token {
+            Tokens::OperatorAdd => Ok(BinaryOperator::Add),
+            Tokens::OperatorSubtract => Ok(BinaryOperator::Subtract),
+            Tokens::OperatorMultiply => Ok(BinaryOperator::Multiply),
+            Tokens::OperatorDivide => Ok(BinaryOperator::Divide),
+            Tokens::OperatorAssign => Ok(BinaryOperator::Assign),
+            _ => Err(()),
         }
     }
 }

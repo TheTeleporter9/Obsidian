@@ -1,4 +1,4 @@
-use crate::DataType;
+use crate::{DataType, tokens::BinaryOperator};
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
@@ -33,9 +33,9 @@ pub enum ASTNode {
         target: Box<ASTNode>,
     },
 
-    BinaryOperaion {
+    BinaryOperation {
         left: Box<ASTNode>,
-        operator: String,
+        operator: BinaryOperator,
         right: Box<ASTNode>,
     },
 
@@ -61,6 +61,14 @@ pub enum ASTNode {
     },
 
     NONE,
+}
+
+#[derive(Debug, Clone)]
+pub enum OperatorType {
+    Addtion,
+    Subtraction,
+    Multiplication,
+    Division,
 }
 
 #[derive(Debug, Clone)]

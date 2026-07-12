@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-int multiplyAndAdd(int a, int b) {
+int multiplyAndAddHELLO(int a, int b) {
     int product = (a * b);
-    int result = (product + 10);
+    float result = (product + 10);
     return result;
+}
+
+int helloworld(int c) {
+    int cool = (c + 10);
+    return cool;
 }
 
 int main() {
@@ -13,7 +18,9 @@ int main() {
     (y - 9);
     y = 10;
     printf("%d\n", x);
-    int answer = multiplyAndAdd(5, 3);
+    int result = helloworld(5);
+    printf("%d\n", result);
+    int answer = multiplyAndAddHELLO(5, 3);
     printf("%d\n", answer);
     return 0;
 }

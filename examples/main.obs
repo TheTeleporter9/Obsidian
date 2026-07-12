@@ -10,13 +10,13 @@ print x
 
 
 func int multiplyAndAdd {
-    [int a, int b]
+    [int a, int b, int add_amount]
 
     var int product = a * b
-    var int result = product + 10
+    var int result = product + add_amount
     
 }(result)
 
-var int answer = multiplyAndAdd[5, 3]
+var int answer = multiplyAndAdd[5, 3, 10]
 
 print answer

@@ -2,23 +2,17 @@ mod AST;
 mod DataType;
 mod lexer;
 mod old_parser;
+mod parsing;
 mod token_table;
 mod tokens;
 mod transpile_c;
 mod type_checker;
-mod parsing;
 
 use crate::lexer::Lexer;
 use crate::old_parser::Parser;
 use crate::transpile_c::transpile_to_c;
 use std::{env, fs, io, path::PathBuf, process::Command};
 
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 fn main() -> io::Result<()> {
     println!("Welcome to Obsidian compiler/transpiler");
 
