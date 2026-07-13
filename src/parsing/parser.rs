@@ -1,11 +1,6 @@
-use std::fmt::Binary;
-
 use crate::DataType;
 use crate::tokens::BinaryOperator;
-use crate::{
-    AST::{self, ASTNode},
-    tokens::Tokens::{self, Identifier},
-};
+use crate::{AST::ASTNode, tokens::Tokens};
 #[derive(Debug, Clone)]
 pub struct Parser {
     tokens: Vec<Tokens>,
@@ -20,14 +15,17 @@ impl Parser {
         }
     }
 
-    pub fn parse_program(&mut self) {
+    pub fn parse_program(&mut self) -> Vec<ASTNode> {
+        let mut nodes = Vec::new();
         while !self.is_at_end() {
-            match (self.tokens[self.current]) {
+            nodes.push(match self.tokens[self.current] {
                 Tokens::EOF => panic!("End of file reached! Yay please implement this!"),
-                Tokens::VAR => self.advance(),
+                Tokens::VAR => self.parse_variable_declaration(),
+                Tokens::PRINT => self.parse_print_statement(),
                 _ => panic!("Unknown Token!"),
-            }
+            });
         }
+        nodes
     }
 
     //helper functions
@@ -203,5 +201,44 @@ impl Parser {
         }
     }
 
-    fn parse_function_call(&mut self) -> ASTNode {}
+    fn parse_function_call(&mut self) -> ASTNode {
+        let function_name = match &self.tokens[self.current] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected function name"),
+        };
+
+        self.advance(); // consume function name
+
+        match &self.tokens[self.current] {
+            Tokens::SquareBracketOpen => self.advance(),
+            _ => panic!("Expected '['"),
+        }
+
+        let mut arguments = Vec::new();
+
+        while !matches!(self.tokens[self.current], Tokens::SquareBracketClose) {
+            arguments.push(self.parse_expression());
+
+            if matches!(self.tokens[self.current], Tokens::Comma) {
+                self.advance();
+            }
+        }
+
+        self.advance(); // consume ']'
+
+        ASTNode::FunctionCall {
+            name: function_name,
+            arguments,
+        }
+    }
+
+    fn parse_print_statement(&mut self) -> ASTNode {
+        self.advance();
+
+        let target_node = self.parse_expression();
+
+        return ASTNode::PrintDecleration {
+            target: Box::new(target_node),
+        };
+    }
 }
