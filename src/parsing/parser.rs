@@ -105,7 +105,7 @@ impl Parser {
 
 impl Parser {
     fn parse_expression(&mut self) -> ASTNode {
-        self.parse_comparison()
+        self.parse_or()
     }
 
     fn parse_and(&mut self) -> ASTNode {
@@ -113,7 +113,39 @@ impl Parser {
 
         while self.check(Tokens::OperatorAnd) {
             let operator = LogicalOperator::try_from(&self.tokens[self.current]).unwrap();
+
+            self.advance();
+
+            let right = self.parse_comparison();
+
+            left = ASTNode::LogicalOperation {
+                left: Box::new(left),
+                operator,
+                right: Box::new(right),
+            }
         }
+
+        left
+    }
+
+    fn parse_or(&mut self) -> ASTNode {
+        let mut left = self.parse_and();
+
+        while self.check(Tokens::OperatorOr) {
+            let operator = LogicalOperator::try_from(&self.tokens[self.current]).unwrap();
+
+            self.advance();
+
+            let right = self.parse_and();
+
+            left = ASTNode::LogicalOperation {
+                left: Box::new(left),
+                operator,
+                right: Box::new(right),
+            }
+        }
+
+        left
     }
 
     fn parse_comparison(&mut self) -> ASTNode {

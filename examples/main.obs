@@ -1,1 +1,22 @@
-x + 5 > y * 2
+
+true and true
+true and false
+false and true
+false and false
+
+true or true
+true or false
+false or true
+false or false
+
+var int x = 5
+var int y = 10
+
+x < y and y > 5
+x > y or x == 5
+
+(5 > 3) and (10 < 20)
+(5 < 3) or (10 < 20)
+
+5 > 3 and 10 < 20 or false
+(5 > 3 and 10 < 20) or false
