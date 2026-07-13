@@ -1,5 +1,6 @@
 use crate::DataType;
 use crate::tokens::BinaryOperator;
+use crate::tokens::ComparisonOperator;
 use crate::tokens::Tokens::OperatorAssign;
 use crate::tokens::UnaryOperator;
 use crate::{AST::ASTNode, tokens::Tokens};
@@ -103,9 +104,34 @@ impl Parser {
 
 impl Parser {
     fn parse_expression(&mut self) -> ASTNode {
-        self.parse_additive()
+        self.parse_comparison()
     }
 
+    fn parse_comparison(&mut self) -> ASTNode {
+        let mut left = self.parse_additive();
+
+        while self.check(Tokens::OperatorEqual)
+            || self.check(Tokens::OperatorNotEqual)
+            || self.check(Tokens::OperatorLess)
+            || self.check(Tokens::OperatorLessEqual)
+            || self.check(Tokens::OperatorGreater)
+            || self.check(Tokens::OperatorGreaterEqual)
+        {
+            let operator = ComparisonOperator::try_from(&self.tokens[self.current]).unwrap();
+
+            self.advance();
+
+            let right = self.parse_additive();
+
+            left = ASTNode::ComparisonOperator {
+                left: Box::new(left),
+                operator,
+                right: Box::new(right),
+            };
+        }
+
+        left
+    }
     fn parse_additive(&mut self) -> ASTNode {
         let mut left: ASTNode = self.parse_multiplicative();
 
@@ -170,7 +196,6 @@ impl Parser {
             Tokens::LiteralInt(value) => {
                 let value = *value;
                 self.advance();
-
                 ASTNode::LiteralInt { value }
             }
 
@@ -181,7 +206,6 @@ impl Parser {
 
             Tokens::OptionFalse => {
                 self.advance();
-
                 ASTNode::LiteralBool { value: false }
             }
 
@@ -189,20 +213,15 @@ impl Parser {
                 if self.peek_next() == Some(&Tokens::SquareBracketOpen) {
                     return self.parse_function_call();
                 }
-
                 let name = name.clone();
                 self.advance();
-
                 ASTNode::Identifier { name }
             }
 
             Tokens::BraceOpen => {
                 self.advance(); //comsume '('
-
                 let expression = self.parse_expression();
-
                 self.consume(Tokens::BraceClose, "Expected ')' after expression");
-
                 expression
             }
 
