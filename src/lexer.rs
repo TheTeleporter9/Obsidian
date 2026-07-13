@@ -1,13 +1,9 @@
 use crate::tokens::Tokens;
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 pub struct Lexer {
     source: Vec<char>,
     current_index_pos: usize,
+    current_line: usize,
+    current_colum: usize,
     pub tokens_out: Vec<Tokens>,
 }
 
@@ -16,6 +12,8 @@ impl Lexer {
         Self {
             source: input.chars().collect(),
             current_index_pos: 0,
+            current_line: 1,
+            current_colum: 1,
             tokens_out: Vec::new(),
         }
     }
@@ -27,6 +25,13 @@ impl Lexer {
 
         while self.current_index_pos < self.source.len() {
             let current_char = self.source[self.current_index_pos];
+
+            if current_char == '\n' {
+                self.current_line += 1;
+                self.current_colum = 1;
+            } else {
+                self.current_colum += 1
+            }
 
             //Step1: skip white spaces and comments
             if current_char.is_whitespace() {
@@ -63,16 +68,14 @@ impl Lexer {
 
                 continue;
             }
-            //Step3: Text, configure text and find keywords
-            if current_char.is_ascii_alphabetic() {
+            if current_char.is_ascii_alphabetic() || current_char == '_' {
                 let mut literal_buffer_str = String::new();
 
-                //run until nolonger finding a character then stop
                 while self.current_index_pos < self.source.len()
-                    && self.source[self.current_index_pos].is_ascii_alphabetic()
+                    && (self.source[self.current_index_pos].is_ascii_alphanumeric()
+                        || self.source[self.current_index_pos] == '_')
                 {
                     literal_buffer_str.push(self.source[self.current_index_pos]);
-
                     self.current_index_pos += 1;
                 }
 
@@ -81,8 +84,6 @@ impl Lexer {
 
                 continue;
             }
-            // Step4: Match Operators & Symbols
-
             // check if it is a spark (:-)
             if self.current_index_pos + 1 < self.source.len()
                 && self.source[self.current_index_pos] == ':'
@@ -98,7 +99,10 @@ impl Lexer {
                 self.tokens_out.push(token);
                 continue;
             }
-            panic!("Unexpected character: {}", current_char);
+            panic!(
+                "Unexpected character: '{}', at line {:?}, colum {:?}",
+                current_char, self.current_line, self.current_colum
+            );
         }
 
         println!("TONENIZATION FINISHED!");

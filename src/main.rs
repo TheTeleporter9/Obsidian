@@ -9,7 +9,7 @@ mod transpile_c;
 mod type_checker;
 
 use crate::lexer::Lexer;
-use crate::old_parser::Parser;
+use crate::parsing::parser::Parser;
 use crate::transpile_c::transpile_to_c;
 use std::{env, fs, io, path::PathBuf, process::Command};
 
@@ -50,11 +50,11 @@ fn main() -> io::Result<()> {
     }
 
     let mut parser = Parser::new(lexer.tokens_out);
-    let parser_out = parser.parse();
+    let parser_out = parser.parse_program();
 
-    let c_out = transpile_to_c(parser_out.clone());
+    //let c_out = transpile_to_c(parser_out.clone());
 
-    fs::write("output.c", c_out)?;
+    //fs::write("output.c", c_out)?;
 
     println!(
         "++++++++++++++++++++++++++++++++++++Parser Output++++++++++++++++++++++++++++++++++++"
@@ -65,7 +65,7 @@ fn main() -> io::Result<()> {
 
     println!("========== program output ==========\n");
 
-    compile_and_run()?;
+    // compile_and_run()?;
 
     Ok(())
 }

@@ -68,14 +68,14 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
 
         ASTNode::LiteralInt { value } => value.to_string(),
 
-        ASTNode::BinaryOperaion {
+        ASTNode::BinaryOperation {
             left,
             operator,
             right,
         } => {
             let left_text = convert_node_to_c_string(&*left);
             let right_text = convert_node_to_c_string(&*right);
-            format!("({} {} {})", left_text, operator, right_text)
+            format!("({:?} {:?} {:?})", left_text, operator, right_text)
         }
 
         ASTNode::LiteralBool { value } => {

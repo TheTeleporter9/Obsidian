@@ -1,3 +1,5 @@
+use strum_macros::Display;
+
 use crate::{DataType, tokens::BinaryOperator};
 
 #[derive(Debug, Clone)]
@@ -63,7 +65,7 @@ pub enum ASTNode {
     NONE,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Display)]
 pub enum OperatorType {
     Addtion,
     Subtraction,

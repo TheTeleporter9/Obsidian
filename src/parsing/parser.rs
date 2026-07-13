@@ -18,12 +18,13 @@ impl Parser {
     pub fn parse_program(&mut self) -> Vec<ASTNode> {
         let mut nodes = Vec::new();
         while !self.is_at_end() {
-            nodes.push(match self.tokens[self.current] {
-                Tokens::EOF => panic!("End of file reached! Yay please implement this!"),
+            let node = match self.peek() {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
                 _ => panic!("Unknown Token!"),
-            });
+            };
+
+            nodes.push(node);
         }
         nodes
     }
@@ -31,10 +32,11 @@ impl Parser {
     //helper functions
 
     fn peek(&self) -> &Tokens {
-        if self.current + 1 < self.tokens.len() {
-            return &self.tokens[self.current + 1];
-        }
-        return &self.tokens[self.current];
+        &self.tokens[self.current]
+    }
+
+    fn peek_next(&self) -> Option<&Tokens> {
+        self.tokens.get(self.current + 1)
     }
 
     fn advance(&mut self) {
@@ -52,11 +54,11 @@ impl Parser {
     }
 
     fn is_at_end(&self) -> bool {
-        return self.current >= self.tokens.len();
+        self.current >= self.tokens.len() || matches!(self.tokens[self.current], Tokens::EOF)
     }
 
     fn check(&self, token: Tokens) -> bool {
-        self.tokens[self.current] == token
+        !self.is_at_end() && self.peek() == &token
     }
 
     fn advance_if_token(&mut self, token: Tokens) {
@@ -143,7 +145,7 @@ impl Parser {
             }
 
             Tokens::Identifier(name) => {
-                if self.peek() == &Tokens::SquareBracketOpen {
+                if self.peek_next() == Some(&Tokens::SquareBracketOpen) {
                     return self.parse_function_call();
                 }
 
