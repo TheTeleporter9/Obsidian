@@ -140,6 +140,7 @@ impl Lexer {
             '[' => Some(Tokens::SquareBracketOpen),
             ']' => Some(Tokens::SquareBracketClose),
             ',' => Some(Tokens::Comma),
+            '!' => Some(Tokens::UnaryOperatorNot),
             _ => None,
         };
 

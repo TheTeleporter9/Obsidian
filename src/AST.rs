@@ -1,6 +1,9 @@
 use strum_macros::Display;
 
-use crate::{DataType, tokens::BinaryOperator};
+use crate::{
+    DataType,
+    tokens::{BinaryOperator, UnaryOperator},
+};
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
@@ -59,6 +62,11 @@ pub enum ASTNode {
 
     ExpressionStatement {
         expression: Box<ASTNode>,
+    },
+
+    UnaryOerator {
+        operator: UnaryOperator,
+        operand: Box<ASTNode>,
     },
     NONE,
 }

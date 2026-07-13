@@ -1,9 +1,6 @@
-#Hello world#
-
-var bool x = true
-var int y = 4
-y - 9
-
-y = 10
-
-print x
+-5
++x
+--x
+-5 * 2
+2 * -5
+-(5 + 3)

@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Tokens {
     Identifier(String),
@@ -8,14 +9,16 @@ pub enum Tokens {
     PRINT,
     FUNC,
 
-    OperatorAssign,
-    OperatorSpark,
-    OperatorAdd,
-    OperatorSubtract,
-    OperatorMultiply,
-    OperatorDivide,
-    OperatorSet, // the : to set stuff
-    OperatorSemicolon,
+    OperatorAssign,    // '='
+    OperatorSpark,     // ':-'
+    OperatorAdd,       // '+'
+    OperatorSubtract,  // '-'
+    OperatorMultiply,  // '*'
+    OperatorDivide,    // '/'
+    OperatorSet,       // the : to set stuff
+    OperatorSemicolon, // ';'
+
+    UnaryOperatorNot, //'!'
 
     BracketOpen, //{}
     BracketClose,
@@ -46,6 +49,13 @@ pub enum BinaryOperator {
     Assign,
 }
 
+#[derive(Clone, Debug)]
+pub enum UnaryOperator {
+    Negate,
+    Positive,
+    Not,
+}
+
 impl TryFrom<&Tokens> for BinaryOperator {
     type Error = ();
 
@@ -56,6 +66,19 @@ impl TryFrom<&Tokens> for BinaryOperator {
             Tokens::OperatorMultiply => Ok(BinaryOperator::Multiply),
             Tokens::OperatorDivide => Ok(BinaryOperator::Divide),
             Tokens::OperatorAssign => Ok(BinaryOperator::Assign),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<&Tokens> for UnaryOperator {
+    type Error = ();
+
+    fn try_from(token: &Tokens) -> Result<Self, Self::Error> {
+        match token {
+            Tokens::OperatorAdd => Ok(UnaryOperator::Positive),
+            Tokens::OperatorSubtract => Ok(UnaryOperator::Negate),
+            Tokens::UnaryOperatorNot => Ok(UnaryOperator::Not),
             _ => Err(()),
         }
     }

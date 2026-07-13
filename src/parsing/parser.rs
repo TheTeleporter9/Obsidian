@@ -1,6 +1,7 @@
 use crate::DataType;
 use crate::tokens::BinaryOperator;
 use crate::tokens::Tokens::OperatorAssign;
+use crate::tokens::UnaryOperator;
 use crate::{AST::ASTNode, tokens::Tokens};
 #[derive(Debug, Clone)]
 pub struct Parser {
@@ -22,7 +23,9 @@ impl Parser {
         while !self.is_at_end() {
             let node = match self.peek() {
                 Tokens::VAR => self.parse_variable_declaration(),
+
                 Tokens::PRINT => self.parse_print_statement(),
+
                 Tokens::Identifier(_) => {
                     if self.peek_next() == Some(&Tokens::OperatorAssign) {
                         self.parse_assignment()
@@ -30,6 +33,15 @@ impl Parser {
                         self.parse_expression()
                     }
                 }
+
+                Tokens::LiteralInt(_)
+                | Tokens::OptionTrue
+                | Tokens::OptionFalse
+                | Tokens::BraceOpen
+                | Tokens::OperatorSubtract
+                | Tokens::OperatorAdd
+                | Tokens::UnaryOperatorNot => self.parse_expression(),
+
                 _ => panic!("Unknown Token!: {:?}", self.peek()),
             };
 
@@ -114,14 +126,14 @@ impl Parser {
     }
 
     fn parse_multiplicative(&mut self) -> ASTNode {
-        let mut left = self.parse_primary();
+        let mut left = self.parse_unary();
 
         while self.check(Tokens::OperatorMultiply) || self.check(Tokens::OperatorDivide) {
             let operator = BinaryOperator::try_from(&self.tokens[self.current]).unwrap();
 
             self.advance();
 
-            let right = self.parse_primary();
+            let right = self.parse_unary();
 
             left = ASTNode::BinaryOperation {
                 left: Box::new(left),
@@ -131,6 +143,26 @@ impl Parser {
         }
 
         left
+    }
+
+    fn parse_unary(&mut self) -> ASTNode {
+        //If the current token matches
+        if self.check(Tokens::UnaryOperatorNot)
+            || self.check(Tokens::OperatorSubtract)
+            || self.check(Tokens::OperatorAdd)
+        {
+            let operator = UnaryOperator::try_from(&self.tokens[self.current]).unwrap();
+
+            self.advance();
+
+            let operand = self.parse_unary();
+
+            return ASTNode::UnaryOerator {
+                operator: operator,
+                operand: Box::new(operand),
+            };
+        }
+        self.parse_primary()
     }
 
     fn parse_primary(&mut self) -> ASTNode {
