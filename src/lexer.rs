@@ -156,6 +156,9 @@ impl Lexer {
             "true" => Tokens::OptionTrue,
             "false" => Tokens::OptionFalse,
 
+            "and" => Tokens::OperatorAnd,
+            "or" => Tokens::OperatorOr,
+
             _ => Tokens::Identifier(string),
         }
     }

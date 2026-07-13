@@ -27,6 +27,9 @@ pub enum Tokens {
     OperatorGreater,
     OperatorGreaterEqual,
 
+    OperatorAnd,
+    OperatorOr,
+
     BracketOpen, //{}
     BracketClose,
     BraceOpen, //()
@@ -73,6 +76,12 @@ pub enum ComparisonOperator {
     SmallerThanEqual,
 }
 
+#[derive(Clone, Debug)]
+pub enum LogicalOperator {
+    And,
+    Or,
+}
+
 impl TryFrom<&Tokens> for BinaryOperator {
     type Error = ();
 
@@ -112,6 +121,18 @@ impl TryFrom<&Tokens> for ComparisonOperator {
             Tokens::OperatorGreaterEqual => Ok(ComparisonOperator::GreaterThanEqual),
             Tokens::OperatorLess => Ok(ComparisonOperator::SmallerThan),
             Tokens::OperatorLessEqual => Ok(ComparisonOperator::SmallerThanEqual),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<&Tokens> for LogicalOperator {
+    type Error = ();
+
+    fn try_from(token: &Tokens) -> Result<Self, Self::Error> {
+        match token {
+            Tokens::OperatorAnd => Ok(LogicalOperator::And),
+            Tokens::OperatorOr => Ok(LogicalOperator::Or),
             _ => Err(()),
         }
     }

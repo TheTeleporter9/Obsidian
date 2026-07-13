@@ -1,6 +1,7 @@
 use crate::DataType;
 use crate::tokens::BinaryOperator;
 use crate::tokens::ComparisonOperator;
+use crate::tokens::LogicalOperator;
 use crate::tokens::Tokens::OperatorAssign;
 use crate::tokens::UnaryOperator;
 use crate::{AST::ASTNode, tokens::Tokens};
@@ -105,6 +106,14 @@ impl Parser {
 impl Parser {
     fn parse_expression(&mut self) -> ASTNode {
         self.parse_comparison()
+    }
+
+    fn parse_and(&mut self) -> ASTNode {
+        let mut left = self.parse_comparison();
+
+        while self.check(Tokens::OperatorAnd) {
+            let operator = LogicalOperator::try_from(&self.tokens[self.current]).unwrap();
+        }
     }
 
     fn parse_comparison(&mut self) -> ASTNode {

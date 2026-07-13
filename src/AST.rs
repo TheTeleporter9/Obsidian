@@ -2,7 +2,7 @@ use strum_macros::Display;
 
 use crate::{
     DataType,
-    tokens::{BinaryOperator, ComparisonOperator, UnaryOperator},
+    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, UnaryOperator},
 };
 
 #[derive(Debug, Clone)]
@@ -72,6 +72,12 @@ pub enum ASTNode {
     ComparisonOperator {
         left: Box<ASTNode>,
         operator: ComparisonOperator,
+        right: Box<ASTNode>,
+    },
+
+    LogicalOperation {
+        left: Box<ASTNode>,
+        operator: LogicalOperator,
         right: Box<ASTNode>,
     },
 
