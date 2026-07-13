@@ -1,5 +1,6 @@
 use crate::DataType;
 use crate::tokens::BinaryOperator;
+use crate::tokens::Tokens::OperatorAssign;
 use crate::{AST::ASTNode, tokens::Tokens};
 #[derive(Debug, Clone)]
 pub struct Parser {
@@ -7,6 +8,7 @@ pub struct Parser {
     current: usize,
 }
 
+//Parser only converts tokens into AST, no typechecking and so on!
 impl Parser {
     pub fn new(input_tokens: Vec<Tokens>) -> Self {
         Self {
@@ -21,7 +23,14 @@ impl Parser {
             let node = match self.peek() {
                 Tokens::VAR => self.parse_variable_declaration(),
                 Tokens::PRINT => self.parse_print_statement(),
-                _ => panic!("Unknown Token!"),
+                Tokens::Identifier(_) => {
+                    if self.peek_next() == Some(&Tokens::OperatorAssign) {
+                        self.parse_assignment()
+                    } else {
+                        self.parse_expression()
+                    }
+                }
+                _ => panic!("Unknown Token!: {:?}", self.peek()),
             };
 
             nodes.push(node);
@@ -242,5 +251,22 @@ impl Parser {
         return ASTNode::PrintDecleration {
             target: Box::new(target_node),
         };
+    }
+
+    fn parse_assignment(&mut self) -> ASTNode {
+        let assingment_name = match &self.tokens[self.current] {
+            Tokens::Identifier(name) => name.clone(),
+            _ => panic!("Expected a valid variable name!"),
+        };
+
+        self.advance(); //consume the idintifier
+        self.consume(OperatorAssign, "Expected '=' after identifier");
+        //
+        let value = self.parse_expression();
+
+        ASTNode::Assignment {
+            name: assingment_name,
+            value: Box::new(value),
+        }
     }
 }

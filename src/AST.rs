@@ -4,13 +4,8 @@ use crate::{DataType, tokens::BinaryOperator};
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
+#[allow(dead_code)]
 
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 pub enum ASTNode {
     VariableDecleration {
         name: String,
@@ -41,7 +36,7 @@ pub enum ASTNode {
         right: Box<ASTNode>,
     },
 
-    Assingment {
+    Assignment {
         name: String,
         value: Box<ASTNode>,
     },
@@ -62,10 +57,14 @@ pub enum ASTNode {
         value: bool,
     },
 
+    ExpressionStatement {
+        expression: Box<ASTNode>,
+    },
     NONE,
 }
 
 #[derive(Debug, Clone, Display)]
+#[allow(dead_code)]
 pub enum OperatorType {
     Addtion,
     Subtraction,
@@ -75,6 +74,7 @@ pub enum OperatorType {
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
+#[allow(dead_code)]
 pub struct FunctionParameter {
     pub name: String,
     pub param_type: DataType::VarType,

@@ -2,13 +2,6 @@ use std::fmt::format;
 
 use crate::{AST::ASTNode, DataType};
 
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
-
 pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
     let mut function_code = String::new();
     let mut main_code = String::new();
@@ -86,7 +79,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             }
         }
 
-        ASTNode::Assingment { name, value } => {
+        ASTNode::Assignment { name, value } => {
             let val_text = convert_node_to_c_string(&*value);
             format!("{} = {}", name, val_text)
         }
