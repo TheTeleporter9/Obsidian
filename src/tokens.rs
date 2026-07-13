@@ -20,6 +20,13 @@ pub enum Tokens {
 
     UnaryOperatorNot, //'!'
 
+    OperatorEqual,
+    OperatorNotEqual,
+    OperatorLess,
+    OperatorLessEqual,
+    OperatorGreater,
+    OperatorGreaterEqual,
+
     BracketOpen, //{}
     BracketClose,
     BraceOpen, //()
@@ -56,6 +63,16 @@ pub enum UnaryOperator {
     Not,
 }
 
+#[derive(Clone, Debug)]
+pub enum ComparisonOperator {
+    Compare,
+    NotCompare,
+    GreaterThan,
+    GreaterThanEqual,
+    SmallerThan,
+    SmallerThanEqual,
+}
+
 impl TryFrom<&Tokens> for BinaryOperator {
     type Error = ();
 
@@ -79,6 +96,22 @@ impl TryFrom<&Tokens> for UnaryOperator {
             Tokens::OperatorAdd => Ok(UnaryOperator::Positive),
             Tokens::OperatorSubtract => Ok(UnaryOperator::Negate),
             Tokens::UnaryOperatorNot => Ok(UnaryOperator::Not),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<&Tokens> for ComparisonOperator {
+    type Error = ();
+
+    fn try_from(token: &Tokens) -> Result<Self, Self::Error> {
+        match token {
+            Tokens::OperatorEqual => Ok(ComparisonOperator::Compare),
+            Tokens::OperatorNotEqual => Ok(ComparisonOperator::NotCompare),
+            Tokens::OperatorGreater => Ok(ComparisonOperator::GreaterThan),
+            Tokens::OperatorGreaterEqual => Ok(ComparisonOperator::GreaterThanEqual),
+            Tokens::OperatorLess => Ok(ComparisonOperator::SmallerThan),
+            Tokens::OperatorLessEqual => Ok(ComparisonOperator::SmallerThanEqual),
             _ => Err(()),
         }
     }

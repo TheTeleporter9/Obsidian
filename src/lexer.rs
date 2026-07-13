@@ -17,6 +17,17 @@ impl Lexer {
             tokens_out: Vec::new(),
         }
     }
+    fn peek(&self) -> Option<char> {
+        self.source.get(self.current_index_pos).copied()
+    }
+
+    fn peek_next(&self) -> Option<char> {
+        self.source.get(self.current_index_pos + 1).copied()
+    }
+
+    fn matches_string(&self, first: char, second: char) -> bool {
+        self.peek() == Some(first) && self.peek_next() == Some(second)
+    }
 
     pub fn tokenize(&mut self) {
         let mut is_comment: bool = false;
@@ -68,6 +79,30 @@ impl Lexer {
 
                 continue;
             }
+            //Check for opreator
+            if self.matches_string('=', '=') {
+                self.tokens_out.push(Tokens::OperatorEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+            if self.matches_string('!', '=') {
+                self.tokens_out.push(Tokens::OperatorNotEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
+            if self.matches_string('<', '=') {
+                self.tokens_out.push(Tokens::OperatorLessEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
+            if self.matches_string('>', '=') {
+                self.tokens_out.push(Tokens::OperatorGreaterEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
             if current_char.is_ascii_alphabetic() || current_char == '_' {
                 let mut literal_buffer_str = String::new();
 
@@ -141,6 +176,8 @@ impl Lexer {
             ']' => Some(Tokens::SquareBracketClose),
             ',' => Some(Tokens::Comma),
             '!' => Some(Tokens::UnaryOperatorNot),
+            '>' => Some(Tokens::OperatorGreater),
+            '<' => Some(Tokens::OperatorLess),
             _ => None,
         };
 
