@@ -3,10 +3,10 @@ mod DataType;
 mod lexer;
 mod old_parser;
 mod parsing;
+mod semantic;
 mod token_table;
 mod tokens;
 mod transpile_c;
-mod type_checker;
 
 use crate::lexer::Lexer;
 use crate::parsing::parser::Parser;
