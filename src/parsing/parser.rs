@@ -297,7 +297,7 @@ impl Parser {
 
         let var_value = self.parse_expression();
 
-        ASTNode::VariableDecleration {
+        ASTNode::VariableDeclaration {
             name: var_name,
             var_type,
             value: Box::new(var_value),
@@ -340,7 +340,7 @@ impl Parser {
 
         let target_node = self.parse_expression();
 
-        return ASTNode::PrintDecleration {
+        return ASTNode::PrintStatement {
             target: Box::new(target_node),
         };
     }

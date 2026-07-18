@@ -8,7 +8,7 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
     for node in ast_nodes {
         match node {
-            ASTNode::FunctionDecleration { .. } => {
+            ASTNode::FunctionDeclaration { .. } => {
                 function_code.push_str(&convert_node_to_c_string(&node));
                 function_code.push_str("\n\n");
             }
@@ -38,7 +38,7 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
 fn convert_node_to_c_string(node: &ASTNode) -> String {
     match node {
-        ASTNode::VariableDecleration {
+        ASTNode::VariableDeclaration {
             name,
             value,
             var_type,
@@ -52,7 +52,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             }
         }
 
-        ASTNode::PrintDecleration { target } => {
+        ASTNode::PrintStatement { target } => {
             let target_text = convert_node_to_c_string(&*target);
             format!("printf(\"%d\\n\", {})", target_text)
         }
@@ -84,7 +84,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             format!("{} = {}", name, val_text)
         }
 
-        ASTNode::FunctionDecleration {
+        ASTNode::FunctionDeclaration {
             name,
             return_type,
             parameters,
