@@ -8,6 +8,7 @@ pub enum Tokens {
     VAR,
     PRINT,
     FUNC,
+    IF,
 
     OperatorAssign,    // '='
     OperatorSpark,     // ':-'

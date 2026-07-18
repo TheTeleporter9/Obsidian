@@ -1,7 +1,7 @@
 use strum_macros::Display;
 
 use crate::{
-    DataType,
+    AST, DataType,
     tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, UnaryOperator},
 };
 
@@ -31,6 +31,11 @@ pub enum ASTNode {
 
     PrintStatement {
         target: Box<ASTNode>,
+    },
+
+    IfStatment {
+        condition: Box<ASTNode>,
+        body: Box<ASTNode>,
     },
 
     BinaryOperation {

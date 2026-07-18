@@ -149,6 +149,8 @@ impl Lexer {
             "var" => Tokens::VAR,
             "print" => Tokens::PRINT,
             "func" => Tokens::FUNC,
+            "if" => Tokens::IF,
+
             "int" => Tokens::TypeInt,
             "float" => Tokens::TypeFloat,
             "bool" => Tokens::TypeBoolean,

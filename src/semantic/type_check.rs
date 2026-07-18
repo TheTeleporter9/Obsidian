@@ -4,7 +4,8 @@ use crate::{
 
 use std::collections::HashMap;
 
-let mut symbol_table = HashMap::<String, VarType>::new();
+use crate::semantic::symbol_table;
+
 
 pub fn check_program(nodes: &[ASTNode]) {
     println!("_________________Type Checker_______________________");
@@ -60,7 +61,8 @@ fn check_variable_declaration(node: &ASTNode) {
     println!("{}", name);
 
     let value_type = check_expression(value);
-    symbol_table.insert();
+    
+    symbol_table::insert_symbol(name.clone(), var_type);
     if *var_type != value_type {
         panic!(
             "Type Error: Vairable '{}' is declared as {:?}, but received {:?}",
