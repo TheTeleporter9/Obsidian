@@ -69,7 +69,7 @@ pub enum ASTNode {
         expression: Box<ASTNode>,
     },
 
-    UnaryOerator {
+    UnaryOperator {
         operator: UnaryOperator,
         operand: Box<ASTNode>,
     },

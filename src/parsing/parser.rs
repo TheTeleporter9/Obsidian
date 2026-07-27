@@ -224,7 +224,7 @@ impl Parser {
 
             let operand = self.parse_unary();
 
-            return ASTNode::UnaryOerator {
+            return ASTNode::UnaryOperator {
                 operator: operator,
                 operand: Box::new(operand),
             };
