@@ -42,6 +42,7 @@ pub fn check_expression(node: &ASTNode) -> VarType {
         ASTNode::LiteralInt { .. } => VarType::Int,
         ASTNode::LiteralFloat { .. } => VarType::Float,
         ASTNode::LiteralBool { .. } => VarType::Bool,
+        ASTNode::LiteralString { .. } => VarType::String,
 
         ASTNode::Identifier { name } => symbol_table::get_symbol(name)
             .unwrap_or_else(|| panic!("Undefined variable '{}'", name)),
@@ -99,7 +100,7 @@ fn check_comparison(left: &ASTNode, _operator: &ComparisonOperator, right: &ASTN
     }
 
     match left_type {
-        VarType::Int | VarType::Float | VarType::Bool => VarType::Bool,
+        VarType::String | VarType::Int | VarType::Float | VarType::Bool => VarType::Bool,
     }
 }
 

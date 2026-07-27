@@ -1,5 +1,7 @@
+use strum_macros::Display;
+
 #[allow(dead_code)]
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Display)]
 pub enum Tokens {
     Identifier(String),
     LiteralInt(i64),

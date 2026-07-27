@@ -3,4 +3,5 @@ pub enum VarType {
     Int,
     Float,
     Bool,
+    String,
 }

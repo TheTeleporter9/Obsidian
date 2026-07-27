@@ -1,2 +1,6 @@
 print "hello"
 
+
+var float hi = 10.0
+
+print hi

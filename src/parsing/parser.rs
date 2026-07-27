@@ -23,6 +23,8 @@ impl Parser {
     pub fn parse_program(&mut self) -> Vec<ASTNode> {
         let mut nodes = Vec::new();
         while !self.is_at_end() {
+            print!("DEBUG-parser- Current Token: {}", self.peek());
+
             let node = match self.peek() {
                 Tokens::VAR => self.parse_variable_declaration(),
 
@@ -39,6 +41,8 @@ impl Parser {
                 }
 
                 Tokens::LiteralInt(_)
+                | Tokens::LiteralFloat(_)
+                | Tokens::LiteralString(_)
                 | Tokens::OptionTrue
                 | Tokens::OptionFalse
                 | Tokens::BraceOpen
@@ -107,6 +111,7 @@ impl Parser {
 
 impl Parser {
     fn parse_expression(&mut self) -> ASTNode {
+        //print!("DEBUG-parser- Parse expression called");
         self.parse_or()
     }
 
@@ -235,6 +240,8 @@ impl Parser {
     }
 
     fn parse_primary(&mut self) -> ASTNode {
+        //print!("DEBUG-parser- Parse Primary Called");
+
         match &self.tokens[self.current] {
             Tokens::LiteralInt(value) => {
                 let value = *value;
@@ -247,6 +254,16 @@ impl Parser {
                 self.advance();
                 ASTNode::LiteralFloat { value }
             }
+
+            Tokens::LiteralString(value) => {
+                let value = value.clone();
+                self.advance();
+                ASTNode::LiteralString { value }
+            }
+
+            Tokens::LiteralString(value) => ASTNode::LiteralString {
+                value: value.to_owned(),
+            },
 
             Tokens::OptionTrue => {
                 self.advance();
@@ -344,6 +361,7 @@ impl Parser {
     }
 
     fn parse_print_statement(&mut self) -> ASTNode {
+        print!("DEBUG-parser- Parse print called");
         self.advance();
 
         let target_node = self.parse_expression();

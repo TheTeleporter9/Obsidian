@@ -56,6 +56,7 @@ fn type_to_c(var_type: &VarType) -> &'static str {
         VarType::Int => "int",
         VarType::Float => "float",
         VarType::Bool => "bool",
+        VarType::String => "const char*",
     }
 }
 fn convert_node_to_c_string(node: &ASTNode) -> String {
@@ -79,7 +80,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                 }
 
                 VarType::Float => {
-                    format!("printf(\"%d\\n\",{})", target_text)
+                    format!("printf(\"%f\\n\",{})", target_text)
                 }
 
                 VarType::Bool => {
@@ -87,6 +88,10 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                         "printf(\"%s\\n\", (({}) ? \"true\" : \"false\"))",
                         target_text
                     )
+                }
+
+                VarType::String => {
+                    format!("printf(\"%s\\n\",{})", target_text)
                 }
             }
         }
@@ -96,6 +101,10 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         ASTNode::LiteralInt { value } => value.to_string(),
 
         ASTNode::LiteralFloat { value } => value.to_string(),
+
+        ASTNode::LiteralString { value } => {
+            format!("\"{}\"", value)
+        }
 
         ASTNode::BinaryOperation {
             left,
@@ -131,6 +140,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                 DataType::VarType::Int => "int",
                 DataType::VarType::Float => "float",
                 DataType::VarType::Bool => "bool",
+                DataType::VarType::String => "const char*",
             };
 
             let params = parameters
@@ -140,6 +150,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                         DataType::VarType::Int => "int",
                         DataType::VarType::Float => "float",
                         DataType::VarType::Bool => "bool",
+                        DataType::VarType::String => "const car*",
                     };
 
                     format!("{} {}", param_type, p.name)
