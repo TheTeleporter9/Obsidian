@@ -1,12 +1,12 @@
 use crate::{
     AST::ASTNode,
     DataType::VarType,
-    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, UnaryOperator},
+    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, Tokens, UnaryOperator},
 };
 
 use crate::semantic::symbol_table;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, env::var};
 
 pub fn check_program(nodes: &[ASTNode]) {
     println!("_________________Type Checker_______________________");
@@ -88,7 +88,7 @@ pub fn check_expression(node: &ASTNode) -> VarType {
     }
 }
 
-fn check_comparison(left: &ASTNode, _operator: &ComparisonOperator, right: &ASTNode) -> VarType {
+fn check_comparison(left: &ASTNode, operator: &ComparisonOperator, right: &ASTNode) -> VarType {
     let left_type = check_expression(left);
     let right_type = check_expression(right);
 
@@ -97,6 +97,13 @@ fn check_comparison(left: &ASTNode, _operator: &ComparisonOperator, right: &ASTN
             "Comparison operands must have the same type. Left: {:?}, Right: {:?}",
             left_type, right_type
         )
+    }
+
+    if left_type == VarType::String {
+        match operator {
+            ComparisonOperator::Compare | ComparisonOperator::NotCompare => return VarType::Bool,
+            _ => panic!("Only == and ! allowed on strings!"),
+        }
     }
 
     match left_type {

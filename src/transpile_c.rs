@@ -17,7 +17,6 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
                 function_code.push_str(&convert_node_to_c_string(&node));
                 function_code.push_str("\n\n");
             }
-
             _ => {
                 main_code.push_str("    ");
                 main_code.push_str(&convert_node_to_c_string(&node));
@@ -30,6 +29,8 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
     output.push_str("#include <stdio.h>\n");
     output.push_str("#include <stdbool.h>\n\n");
+    output.push_str("#include <stdlib.h>\n");
+    output.push_str("#include <string.h>\n");
 
     output.push_str(&function_code);
 
@@ -56,7 +57,7 @@ fn type_to_c(var_type: &VarType) -> &'static str {
         VarType::Int => "int",
         VarType::Float => "float",
         VarType::Bool => "bool",
-        VarType::String => "const char*",
+        VarType::String => "char*",
     }
 }
 fn convert_node_to_c_string(node: &ASTNode) -> String {
@@ -140,7 +141,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                 DataType::VarType::Int => "int",
                 DataType::VarType::Float => "float",
                 DataType::VarType::Bool => "bool",
-                DataType::VarType::String => "const char*",
+                DataType::VarType::String => "char*",
             };
 
             let params = parameters
@@ -192,6 +193,20 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         } => {
             let left_text = convert_node_to_c_string(left);
             let right_text = convert_node_to_c_string(right);
+
+            if type_check::check_expression(left) == VarType::String {
+                return match operator {
+                    ComparisonOperator::Compare => {
+                        format!("(strcmp({}, {}) == 0)", left_text, right_text)
+                    }
+
+                    ComparisonOperator::NotCompare => {
+                        format!("(strcmp({}, {}) != 0)", left_text, right_text)
+                    }
+
+                    _ => panic!("Only == and != are allowed on strings!"),
+                };
+            }
 
             let op = match operator {
                 ComparisonOperator::Compare => "==",
