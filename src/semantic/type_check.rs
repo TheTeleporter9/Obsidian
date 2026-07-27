@@ -1,7 +1,7 @@
 use crate::{
     AST::ASTNode,
     DataType::VarType,
-    tokens::{BinaryOperator, UnaryOperator},
+    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, UnaryOperator},
 };
 
 use crate::semantic::symbol_table;
@@ -50,20 +50,16 @@ fn check_expression(node: &ASTNode) -> VarType {
             let operand_type = check_expression(operand);
 
             match operator {
-                UnaryOperator::Negate => match operand_type {
+                UnaryOperator::Negate | UnaryOperator::Positive => match operand_type {
                     VarType::Int | VarType::Float => operand_type,
-                    _ => panic!("Unary '-' requires a number."),
-                },
-
-                UnaryOperator::Positive => match operand_type {
-                    VarType::Int | VarType::Float => operand_type,
-                    _ => panic!("Unary '+' requires a number."),
+                    _ => panic!("Unary '+' and '-' require a numeric operand."),
                 },
 
                 UnaryOperator::Not => {
                     if operand_type != VarType::Bool {
                         panic!("Unary '!' requires a bool.");
                     }
+
                     VarType::Bool
                 }
             }
@@ -75,8 +71,51 @@ fn check_expression(node: &ASTNode) -> VarType {
             right,
         } => check_binary_operation(left, operator, right),
 
+        ASTNode::ComparisonOperator {
+            left,
+            operator,
+            right,
+        } => check_comparison(left, operator, right),
+
+        ASTNode::LogicalOperation {
+            left,
+            operator,
+            right,
+        } => check_logical(left, operator, right),
+
         _ => panic!("Expected expression."),
     }
+}
+
+fn check_comparison(left: &ASTNode, _operator: &ComparisonOperator, right: &ASTNode) -> VarType {
+    let left_type = check_expression(left);
+    let right_type = check_expression(right);
+
+    if left_type != right_type {
+        panic!(
+            "Comparison operands must have the same type. Left: {:?}, Right: {:?}",
+            left_type, right_type
+        )
+    }
+
+    match left_type {
+        VarType::Int | VarType::Float | VarType::Bool => VarType::Bool,
+    }
+}
+
+fn check_logical(left: &ASTNode, _operator: &LogicalOperator, right: &ASTNode) -> VarType {
+    let left_type = check_expression(left);
+    let right_type = check_expression(right);
+
+    if left_type != VarType::Bool {
+        panic!("Left operand of logical operand must be bool!");
+    }
+
+    if right_type != VarType::Bool {
+        panic!("Right operand of logical operator must be bool!");
+    }
+
+    VarType::Bool
 }
 
 fn check_assignment(node: &ASTNode) {

@@ -59,13 +59,21 @@ fn main() -> io::Result<()> {
     println!(
         "++++++++++++++++++++++++++++++++++++Parser Output++++++++++++++++++++++++++++++++++++"
     );
-    for node in parser_out {
+    for node in &parser_out {
         println!("{:?}", node)
     }
 
-    println!("========== program output ==========\n");
+    println!("_________________Type Checker_______________________");
+    semantic::type_check::check_program(&parser_out);
 
-    // compile_and_run()?;
+    println!("Type checking succeeded!");
+
+    let c_out = transpile_to_c(parser_out);
+
+    fs::write("output.c", c_out)?;
+
+    println!("================== Program output ==============\n");
+    compile_and_run()?;
 
     Ok(())
 }
