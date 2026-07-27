@@ -92,11 +92,22 @@ fn check_comparison(left: &ASTNode, operator: &ComparisonOperator, right: &ASTNo
     let left_type = check_expression(left);
     let right_type = check_expression(right);
 
-    if left_type != right_type {
-        panic!(
-            "Comparison operands must have the same type. Left: {:?}, Right: {:?}",
-            left_type, right_type
-        )
+    match (&left_type, &right_type) {
+        (VarType::Int, VarType::Float)
+        | (VarType::Float, VarType::Int)
+        | (VarType::Int, VarType::Int)
+        | (VarType::Float, VarType::Float) => {
+            // numeric comparison is allowed
+        }
+
+        _ if left_type != right_type => {
+            panic!(
+                "Comparison operands must have the same type. Left: {:?}, Right: {:?}",
+                left_type, right_type
+            );
+        }
+
+        _ => {}
     }
 
     if left_type == VarType::String {

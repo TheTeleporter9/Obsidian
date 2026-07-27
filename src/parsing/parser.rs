@@ -34,8 +34,25 @@ impl Parser {
                     if self.peek_next() == Some(&Tokens::OperatorAssign) {
                         self.parse_assignment()
                     } else {
-                        ASTNode::ExpressionStatement {
-                            expression: Box::new(self.parse_expression()),
+                        let expression = self.parse_expression();
+
+                        match &expression {
+                            ASTNode::BinaryOperation { .. } => {
+                                if let Some(name) = Self::first_identifier(&expression) {
+                                    ASTNode::Assignment {
+                                        name,
+                                        value: Box::new(expression),
+                                    }
+                                } else {
+                                    ASTNode::ExpressionStatement {
+                                        expression: Box::new(expression),
+                                    }
+                                }
+                            }
+
+                            _ => ASTNode::ExpressionStatement {
+                                expression: Box::new(expression),
+                            },
                         }
                     }
                 }
@@ -101,6 +118,16 @@ impl Parser {
             self.advance();
         } else {
             panic!("{}", error_message)
+        }
+    }
+
+    fn first_identifier(node: &ASTNode) -> Option<String> {
+        match node {
+            ASTNode::Identifier { name } => Some(name.clone()),
+
+            ASTNode::BinaryOperation { left, .. } => Self::first_identifier(left),
+
+            _ => None,
         }
     }
 

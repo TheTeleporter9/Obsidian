@@ -52,16 +52,16 @@ impl Lexer {
 
             //Make shure that the comment also gets closed, otherwise the entire code becomes a comment
             if current_char == '#' {
-                is_comment = !is_comment;
-                self.current_index_pos += 1;
+                while let Some(c) = self.peek() {
+                    self.current_index_pos += 1;
+
+                    if c == '\n' {
+                        break;
+                    }
+                }
+
                 continue;
             }
-
-            if is_comment {
-                self.current_index_pos += 1;
-                continue;
-            }
-
             // Step2: Numbers
 
             if current_char.is_ascii_digit() {
