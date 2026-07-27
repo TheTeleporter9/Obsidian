@@ -1,7 +1,7 @@
 ### DEV NOTE
 All logic comes form non AI developer.
 Only some implementation has been used with AI to help to get stuff working.
-
+Read me has been made to look better by AI, and check for spelling.
 
 # What is Obsidian?
 
