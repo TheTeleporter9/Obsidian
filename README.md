@@ -1,3 +1,8 @@
+### DEV NOTE
+All logic comes form non AI developer.
+Only some implementation has been used with AI to help to get stuff working.
+
+
 # What is Obsidian?
 
 Obsidian (soon to be **Flint**) is a high-level programming language designed to simplify low-level development. It is a source-to-source transpiler written in **Rust** that generates standard **C** code, which is then compiled with **GCC**.
