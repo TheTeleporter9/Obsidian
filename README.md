@@ -1,4 +1,3 @@
-
 # DEVELOPMENT NOTE: 
 ============================================================================
 ### Initial logic for this system was drafted using AI pseudocode.

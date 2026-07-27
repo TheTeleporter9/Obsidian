@@ -1,22 +1,22 @@
-use crate::DataType;
+use strum_macros::Display;
+
+use crate::{
+    AST, DataType,
+    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator, UnaryOperator},
+};
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
+#[allow(dead_code)]
 
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 pub enum ASTNode {
-    VariableDecleration {
+    VariableDeclaration {
         name: String,
         var_type: DataType::VarType,
         value: Box<ASTNode>, //Makes shure that there can't be a memory overflow!
     },
 
-    FunctionDecleration {
+    FunctionDeclaration {
         name: String,
         return_type: DataType::VarType,
         parameters: Vec<FunctionParameter>,
@@ -29,17 +29,22 @@ pub enum ASTNode {
         arguments: Vec<ASTNode>,
     },
 
-    PrintDecleration {
+    PrintStatement {
         target: Box<ASTNode>,
     },
 
-    BinaryOperaion {
+    IfStatment {
+        condition: Box<ASTNode>,
+        body: Box<ASTNode>,
+    },
+
+    BinaryOperation {
         left: Box<ASTNode>,
-        operator: String,
+        operator: BinaryOperator,
         right: Box<ASTNode>,
     },
 
-    Assingment {
+    Assignment {
         name: String,
         value: Box<ASTNode>,
     },
@@ -60,11 +65,35 @@ pub enum ASTNode {
         value: bool,
     },
 
-    NONE,
+    LiteralString {
+        value: String,
+    },
+
+    ExpressionStatement {
+        expression: Box<ASTNode>,
+    },
+
+    UnaryOperator {
+        operator: UnaryOperator,
+        operand: Box<ASTNode>,
+    },
+
+    ComparisonOperator {
+        left: Box<ASTNode>,
+        operator: ComparisonOperator,
+        right: Box<ASTNode>,
+    },
+
+    LogicalOperation {
+        left: Box<ASTNode>,
+        operator: LogicalOperator,
+        right: Box<ASTNode>,
+    },
 }
 
 #[derive(Debug, Clone)]
 #[warn(non_snake_case)]
+#[allow(dead_code)]
 pub struct FunctionParameter {
     pub name: String,
     pub param_type: DataType::VarType,

@@ -1,13 +1,11 @@
 use std::fmt::format;
 
-use crate::{AST::ASTNode, DataType};
-
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
+use crate::{
+    AST::ASTNode,
+    DataType::{self, VarType},
+    semantic::{symbol_table, type_check},
+    tokens::{BinaryOperator, ComparisonOperator, LogicalOperator},
+};
 
 pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
     let mut function_code = String::new();
@@ -15,11 +13,10 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
     for node in ast_nodes {
         match node {
-            ASTNode::FunctionDecleration { .. } => {
+            ASTNode::FunctionDeclaration { .. } => {
                 function_code.push_str(&convert_node_to_c_string(&node));
                 function_code.push_str("\n\n");
             }
-
             _ => {
                 main_code.push_str("    ");
                 main_code.push_str(&convert_node_to_c_string(&node));
@@ -32,6 +29,8 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
 
     output.push_str("#include <stdio.h>\n");
     output.push_str("#include <stdbool.h>\n\n");
+    output.push_str("#include <stdlib.h>\n");
+    output.push_str("#include <string.h>\n");
 
     output.push_str(&function_code);
 
@@ -43,39 +42,79 @@ pub fn transpile_to_c(ast_nodes: Vec<ASTNode>) -> String {
     output
 }
 
+fn operator_to_c(op: &BinaryOperator) -> &'static str {
+    match op {
+        BinaryOperator::Add => "+",
+        BinaryOperator::Subtract => "-",
+        BinaryOperator::Multiply => "*",
+        BinaryOperator::Divide => "/",
+        BinaryOperator::Assign => "=",
+    }
+}
+
+fn type_to_c(var_type: &VarType) -> &'static str {
+    match var_type {
+        VarType::Int => "int",
+        VarType::Float => "float",
+        VarType::Bool => "bool",
+        VarType::String => "char*",
+    }
+}
 fn convert_node_to_c_string(node: &ASTNode) -> String {
     match node {
-        ASTNode::VariableDecleration {
+        ASTNode::VariableDeclaration {
             name,
             value,
             var_type,
         } => {
             let value_text = convert_node_to_c_string(&*value);
 
-            match var_type {
-                DataType::VarType::Int => format!("int {} = {}", name, value_text),
-                DataType::VarType::Float => format!("float {} = {}", name, value_text),
-                DataType::VarType::Bool => format!("bool {} = {}", name, value_text),
-            }
+            format!("{} {} = {}", type_to_c(var_type), name, value_text)
         }
 
-        ASTNode::PrintDecleration { target } => {
-            let target_text = convert_node_to_c_string(&*target);
-            format!("printf(\"%d\\n\", {})", target_text)
+        ASTNode::PrintStatement { target } => {
+            let target_text = convert_node_to_c_string(target);
+
+            match type_check::check_expression(target) {
+                VarType::Int => {
+                    format!("printf(\"%d\\n\",{})", target_text)
+                }
+
+                VarType::Float => {
+                    format!("printf(\"%f\\n\",{})", target_text)
+                }
+
+                VarType::Bool => {
+                    format!(
+                        "printf(\"%s\\n\", (({}) ? \"true\" : \"false\"))",
+                        target_text
+                    )
+                }
+
+                VarType::String => {
+                    format!("printf(\"%s\\n\",{})", target_text)
+                }
+            }
         }
 
         ASTNode::Identifier { name } => name.clone(),
 
         ASTNode::LiteralInt { value } => value.to_string(),
 
-        ASTNode::BinaryOperaion {
+        ASTNode::LiteralFloat { value } => value.to_string(),
+
+        ASTNode::LiteralString { value } => {
+            format!("\"{}\"", value)
+        }
+
+        ASTNode::BinaryOperation {
             left,
             operator,
             right,
         } => {
             let left_text = convert_node_to_c_string(&*left);
             let right_text = convert_node_to_c_string(&*right);
-            format!("({} {} {})", left_text, operator, right_text)
+            format!("({} {} {})", left_text, operator_to_c(operator), right_text)
         }
 
         ASTNode::LiteralBool { value } => {
@@ -86,12 +125,12 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
             }
         }
 
-        ASTNode::Assingment { name, value } => {
+        ASTNode::Assignment { name, value } => {
             let val_text = convert_node_to_c_string(&*value);
             format!("{} = {}", name, val_text)
         }
 
-        ASTNode::FunctionDecleration {
+        ASTNode::FunctionDeclaration {
             name,
             return_type,
             parameters,
@@ -102,6 +141,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                 DataType::VarType::Int => "int",
                 DataType::VarType::Float => "float",
                 DataType::VarType::Bool => "bool",
+                DataType::VarType::String => "char*",
             };
 
             let params = parameters
@@ -111,6 +151,7 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                         DataType::VarType::Int => "int",
                         DataType::VarType::Float => "float",
                         DataType::VarType::Bool => "bool",
+                        DataType::VarType::String => "const car*",
                     };
 
                     format!("{} {}", param_type, p.name)
@@ -143,6 +184,58 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
                 .join(", ");
 
             format!("{}({})", name, args)
+        }
+
+        ASTNode::ComparisonOperator {
+            left,
+            operator,
+            right,
+        } => {
+            let left_text = convert_node_to_c_string(left);
+            let right_text = convert_node_to_c_string(right);
+
+            if type_check::check_expression(left) == VarType::String {
+                return match operator {
+                    ComparisonOperator::Compare => {
+                        format!("(strcmp({}, {}) == 0)", left_text, right_text)
+                    }
+
+                    ComparisonOperator::NotCompare => {
+                        format!("(strcmp({}, {}) != 0)", left_text, right_text)
+                    }
+
+                    _ => panic!("Only == and != are allowed on strings!"),
+                };
+            }
+
+            let op = match operator {
+                ComparisonOperator::Compare => "==",
+                ComparisonOperator::NotCompare => "!=",
+                ComparisonOperator::GreaterThan => ">",
+                ComparisonOperator::GreaterThanEqual => ">=",
+                ComparisonOperator::SmallerThan => "<",
+                ComparisonOperator::SmallerThanEqual => "<=",
+            };
+
+            format!("({} {} {})", left_text, op, right_text)
+        }
+
+        ASTNode::ExpressionStatement { expression } => convert_node_to_c_string(expression),
+
+        ASTNode::LogicalOperation {
+            left,
+            operator,
+            right,
+        } => {
+            let left_text = convert_node_to_c_string(left);
+            let right_text = convert_node_to_c_string(right);
+
+            let op = match operator {
+                LogicalOperator::And => "&&",
+                LogicalOperator::Or => "||",
+            };
+
+            format!("({} {} {})", left_text, op, right_text)
         }
 
         _ => panic!(

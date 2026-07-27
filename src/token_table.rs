@@ -31,7 +31,7 @@ impl variable_table {
         //Make shure that variable_data is of type Vaiable Decleration!
         if !matches!(
             variable_data,
-            ASTNode::VariableDecleration {
+            ASTNode::VariableDeclaration {
                 name: _,
                 value: _,
                 var_type: _
@@ -59,7 +59,7 @@ impl variable_table {
 
     pub fn var_name_match(token: &Tokens, node: &ASTNode) -> bool {
         match (token, node) {
-            (Tokens::Identifier(token_name), ASTNode::VariableDecleration { name, .. }) => {
+            (Tokens::Identifier(token_name), ASTNode::VariableDeclaration { name, .. }) => {
                 token_name == name
             }
 
@@ -71,7 +71,7 @@ impl variable_table {
     pub fn get_type_by_name(&self, name: &str) -> Option<DataType::VarType> {
         for scope in self.scopes.iter().rev() {
             for variable in scope {
-                if let ASTNode::VariableDecleration {
+                if let ASTNode::VariableDeclaration {
                     name: var_name,
                     var_type,
                     ..
@@ -102,7 +102,7 @@ impl FunctionTable {
         // Make sure that function_data is of type FunctionDeclaration!
         if !matches!(
             function_data,
-            ASTNode::FunctionDecleration {
+            ASTNode::FunctionDeclaration {
                 name: _,
                 return_type: _,
                 parameters: _,
@@ -132,7 +132,7 @@ impl FunctionTable {
 
     pub fn func_name_match(token: &Tokens, node: &ASTNode) -> bool {
         match (token, node) {
-            (Tokens::Identifier(token_name), ASTNode::FunctionDecleration { name, .. }) => {
+            (Tokens::Identifier(token_name), ASTNode::FunctionDeclaration { name, .. }) => {
                 token_name == name
             }
 
@@ -142,7 +142,7 @@ impl FunctionTable {
 
     pub fn get_type_by_name(&self, name: &str) -> Option<DataType::VarType> {
         self.functions.iter().find_map(|function| match function {
-            ASTNode::FunctionDecleration {
+            ASTNode::FunctionDeclaration {
                 name: func_name,
                 return_type,
                 ..

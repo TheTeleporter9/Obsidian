@@ -1,22 +1,46 @@
-#Hello world#
+# This is a comment 
 
-var bool x = true
-var int y = 4
-y - 9
+var int x = 10
+var int x2 = x + 10
 
-y = 10
+x = 11
 
+#All floats need to have a '.' in them otherwise they are invalid!
+var float y = 3.6
+
+#You can do operations without needing to assing a variable to them!
+#The first variable in the expression will be assinged the value of the result of the expression!
+#Make shure that the variable comes first! (For now, this is due to change in the future!)
+
+print "Before expression"
+print x
+
+x + 2 - (y * x2) / 10 * 100
+
+print "After expression"
 print x
 
 
-func int multiplyAndAdd {
-    [int a, int b]
+#You can also do strings
 
-    var int product = a * b
-    var int result = product + 10
-    
-}(result)
+var string coolName = "Hello"
 
-var int answer = multiplyAndAdd[5, 3]
+#Strings are annotated by a '"', like above.
+#They are still very rudementary, you can only compare them and print them atm (This is also due to chagne!)
 
-print answer
+#Booleans also exsits, and are part of the base 4 types. 
+var bool coolBool = false
+
+#Bools can store the result of expressions!
+
+coolBool = x >= y - x2 and coolName == "Hi"
+
+print coolBool
+
+print coolName == "Hello"
+
+# At the momoent you can't get user input.
+# Currently Strings are beeing added with String interpelation and Concatenation
+# This will come in the near feature.
+# Then controll flow and loops!
+

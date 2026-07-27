@@ -1,23 +1,18 @@
 mod AST;
 mod DataType;
 mod lexer;
-mod parser;
+mod old_parser;
+mod parsing;
+mod semantic;
 mod token_table;
 mod tokens;
 mod transpile_c;
-mod type_checker;
 
 use crate::lexer::Lexer;
-use crate::parser::Parser;
+use crate::parsing::parser::Parser;
 use crate::transpile_c::transpile_to_c;
 use std::{env, fs, io, path::PathBuf, process::Command};
 
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
 fn main() -> io::Result<()> {
     println!("Welcome to Obsidian compiler/transpiler");
 
@@ -55,21 +50,29 @@ fn main() -> io::Result<()> {
     }
 
     let mut parser = Parser::new(lexer.tokens_out);
-    let parser_out = parser.parse();
+    let parser_out = parser.parse_program();
 
-    let c_out = transpile_to_c(parser_out.clone());
+    //let c_out = transpile_to_c(parser_out.clone());
 
-    fs::write("output.c", c_out)?;
+    //fs::write("output.c", c_out)?;
 
     println!(
         "++++++++++++++++++++++++++++++++++++Parser Output++++++++++++++++++++++++++++++++++++"
     );
-    for node in parser_out {
+    for node in &parser_out {
         println!("{:?}", node)
     }
 
-    println!("========== program output ==========\n");
+    println!("_________________Type Checker_______________________");
+    semantic::type_check::check_program(&parser_out);
 
+    println!("Type checking succeeded!");
+
+    let c_out = transpile_to_c(parser_out);
+
+    fs::write("output.c", c_out)?;
+
+    println!("================== Program output ==============\n");
     compile_and_run()?;
 
     Ok(())

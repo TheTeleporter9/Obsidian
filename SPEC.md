@@ -1,4 +1,4 @@
-# Obsidian Language — Full Design Specification
+
 ### Version 0.1 — Complete Reference
 
 ---

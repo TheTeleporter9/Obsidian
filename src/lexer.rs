@@ -1,13 +1,9 @@
-use crate::tokens::Tokens;
-// ============================================================================
-// DEVELOPMENT NOTE:
-// Initial logic for this system was drafted using AI pseudocode.
-// The entire codebase has since been manually rewritten, refactored, and
-// engineered from scratch. Future development is entirely human-written.
-// ============================================================================
+use crate::tokens::Tokens::{self, LiteralString};
 pub struct Lexer {
     source: Vec<char>,
     current_index_pos: usize,
+    current_line: usize,
+    current_colum: usize,
     pub tokens_out: Vec<Tokens>,
 }
 
@@ -16,8 +12,21 @@ impl Lexer {
         Self {
             source: input.chars().collect(),
             current_index_pos: 0,
+            current_line: 1,
+            current_colum: 1,
             tokens_out: Vec::new(),
         }
+    }
+    fn peek(&self) -> Option<char> {
+        self.source.get(self.current_index_pos).copied()
+    }
+
+    fn peek_next(&self) -> Option<char> {
+        self.source.get(self.current_index_pos + 1).copied()
+    }
+
+    fn matches_string(&self, first: char, second: char) -> bool {
+        self.peek() == Some(first) && self.peek_next() == Some(second)
     }
 
     pub fn tokenize(&mut self) {
@@ -28,6 +37,13 @@ impl Lexer {
         while self.current_index_pos < self.source.len() {
             let current_char = self.source[self.current_index_pos];
 
+            if current_char == '\n' {
+                self.current_line += 1;
+                self.current_colum = 1;
+            } else {
+                self.current_colum += 1
+            }
+
             //Step1: skip white spaces and comments
             if current_char.is_whitespace() {
                 self.current_index_pos += 1;
@@ -36,43 +52,98 @@ impl Lexer {
 
             //Make shure that the comment also gets closed, otherwise the entire code becomes a comment
             if current_char == '#' {
-                is_comment = !is_comment;
-                self.current_index_pos += 1;
+                while let Some(c) = self.peek() {
+                    self.current_index_pos += 1;
+
+                    if c == '\n' {
+                        break;
+                    }
+                }
+
                 continue;
             }
-
-            if is_comment {
-                self.current_index_pos += 1;
-                continue;
-            }
-
             // Step2: Numbers
+
             if current_char.is_ascii_digit() {
-                let mut literal_buffer_int = String::new();
+                let mut number = String::new();
+                let mut has_decimal = false;
+
+                while self.current_index_pos < self.source.len() {
+                    let c = self.source[self.current_index_pos];
+
+                    if c.is_ascii_digit() {
+                        number.push(c);
+                        self.current_index_pos += 1;
+                    } else if c == '.' && !has_decimal {
+                        has_decimal = true;
+                        number.push(c);
+                        self.current_index_pos += 1;
+                    } else {
+                        break;
+                    }
+                }
+
+                if has_decimal {
+                    self.tokens_out
+                        .push(Tokens::LiteralFloat(number.parse().unwrap()));
+                } else {
+                    self.tokens_out
+                        .push(Tokens::LiteralInt(number.parse().unwrap()));
+                }
+
+                continue;
+            }
+
+            //Check for opreator
+            if self.matches_string('=', '=') {
+                self.tokens_out.push(Tokens::OperatorEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+            if self.matches_string('!', '=') {
+                self.tokens_out.push(Tokens::OperatorNotEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
+            if self.matches_string('<', '=') {
+                self.tokens_out.push(Tokens::OperatorLessEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
+            if self.matches_string('>', '=') {
+                self.tokens_out.push(Tokens::OperatorGreaterEqual);
+                self.current_index_pos += 2;
+                continue;
+            }
+
+            if current_char == '"' {
+                self.current_index_pos += 1;
+
+                let mut buffer = String::new();
 
                 while self.current_index_pos < self.source.len()
-                    && self.source[self.current_index_pos].is_ascii_digit()
+                    && self.source[self.current_index_pos] != '"'
                 {
-                    literal_buffer_int.push(self.source[self.current_index_pos]);
-
+                    buffer.push(self.source[self.current_index_pos]);
                     self.current_index_pos += 1;
                 }
 
-                self.tokens_out
-                    .push(Tokens::LiteralInt(literal_buffer_int.parse().unwrap()));
+                self.current_index_pos += 1;
 
+                self.tokens_out.push(LiteralString(buffer));
                 continue;
             }
-            //Step3: Text, configure text and find keywords
-            if current_char.is_ascii_alphabetic() {
+
+            if current_char.is_ascii_alphabetic() || current_char == '_' {
                 let mut literal_buffer_str = String::new();
 
-                //run until nolonger finding a character then stop
                 while self.current_index_pos < self.source.len()
-                    && self.source[self.current_index_pos].is_ascii_alphabetic()
+                    && (self.source[self.current_index_pos].is_ascii_alphanumeric()
+                        || self.source[self.current_index_pos] == '_')
                 {
                     literal_buffer_str.push(self.source[self.current_index_pos]);
-
                     self.current_index_pos += 1;
                 }
 
@@ -81,8 +152,6 @@ impl Lexer {
 
                 continue;
             }
-            // Step4: Match Operators & Symbols
-
             // check if it is a spark (:-)
             if self.current_index_pos + 1 < self.source.len()
                 && self.source[self.current_index_pos] == ':'
@@ -98,7 +167,10 @@ impl Lexer {
                 self.tokens_out.push(token);
                 continue;
             }
-            panic!("Unexpected character: {}", current_char);
+            panic!(
+                "Unexpected character: '{}', at line {:?}, colum {:?}",
+                current_char, self.current_line, self.current_colum
+            );
         }
 
         println!("TONENIZATION FINISHED!");
@@ -110,12 +182,18 @@ impl Lexer {
             "var" => Tokens::VAR,
             "print" => Tokens::PRINT,
             "func" => Tokens::FUNC,
+            "if" => Tokens::IF,
+
             "int" => Tokens::TypeInt,
             "float" => Tokens::TypeFloat,
             "bool" => Tokens::TypeBoolean,
+            "string" => Tokens::TypeString,
 
             "true" => Tokens::OptionTrue,
             "false" => Tokens::OptionFalse,
+
+            "and" => Tokens::OperatorAnd,
+            "or" => Tokens::OperatorOr,
 
             _ => Tokens::Identifier(string),
         }
@@ -136,6 +214,9 @@ impl Lexer {
             '[' => Some(Tokens::SquareBracketOpen),
             ']' => Some(Tokens::SquareBracketClose),
             ',' => Some(Tokens::Comma),
+            '!' => Some(Tokens::UnaryOperatorNot),
+            '>' => Some(Tokens::OperatorGreater),
+            '<' => Some(Tokens::OperatorLess),
             _ => None,
         };
 
