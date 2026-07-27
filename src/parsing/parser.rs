@@ -302,6 +302,7 @@ impl Parser {
             Tokens::TypeInt => DataType::VarType::Int,
             Tokens::TypeFloat => DataType::VarType::Float,
             Tokens::TypeBoolean => DataType::VarType::Bool,
+            Tokens::TypeString => DataType::VarType::String,
             _ => panic!("invalid type"),
         };
 

@@ -1,6 +1,9 @@
 print "hello"
 
+var string message = "How are you?"
 
 var float hi = 10.0
 
 print hi
+
+print message
