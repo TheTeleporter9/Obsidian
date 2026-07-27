@@ -65,6 +65,10 @@ pub enum ASTNode {
         value: bool,
     },
 
+    LiteralString {
+        value: String,
+    },
+
     ExpressionStatement {
         expression: Box<ASTNode>,
     },

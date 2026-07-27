@@ -1,4 +1,4 @@
-use crate::tokens::Tokens;
+use crate::tokens::Tokens::{self, LiteralString};
 pub struct Lexer {
     source: Vec<char>,
     current_index_pos: usize,
@@ -68,12 +68,8 @@ impl Lexer {
                 let mut number = String::new();
                 let mut has_decimal = false;
 
-                println!("DEBUG-Lexer- Found number with '{}'", current_char);
-
                 while self.current_index_pos < self.source.len() {
                     let c = self.source[self.current_index_pos];
-
-                    println!("DEBUG-Lexer- Reading '{}'", c);
 
                     if c.is_ascii_digit() {
                         number.push(c);
@@ -119,6 +115,24 @@ impl Lexer {
             if self.matches_string('>', '=') {
                 self.tokens_out.push(Tokens::OperatorGreaterEqual);
                 self.current_index_pos += 2;
+                continue;
+            }
+
+            if current_char == '"' {
+                self.current_index_pos += 1;
+
+                let mut buffer = String::new();
+
+                while self.current_index_pos < self.source.len()
+                    && self.source[self.current_index_pos] != '"'
+                {
+                    buffer.push(self.source[self.current_index_pos]);
+                    self.current_index_pos += 1;
+                }
+
+                self.current_index_pos += 1;
+
+                self.tokens_out.push(LiteralString(buffer));
                 continue;
             }
 

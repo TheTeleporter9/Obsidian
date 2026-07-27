@@ -1,14 +1,2 @@
-
-var int hi = 10
-
-var float b = 0.6
-
-var bool aelo = true
-
-hi - b
-
-print aelo
-
-print hi
-
+print "hello"
 
