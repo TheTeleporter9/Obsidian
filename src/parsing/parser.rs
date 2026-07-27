@@ -32,7 +32,9 @@ impl Parser {
                     if self.peek_next() == Some(&Tokens::OperatorAssign) {
                         self.parse_assignment()
                     } else {
-                        self.parse_expression()
+                        ASTNode::ExpressionStatement {
+                            expression: Box::new(self.parse_expression()),
+                        }
                     }
                 }
 
@@ -238,6 +240,12 @@ impl Parser {
                 let value = *value;
                 self.advance();
                 ASTNode::LiteralInt { value }
+            }
+
+            Tokens::LiteralFloat(value) => {
+                let value = *value;
+                self.advance();
+                ASTNode::LiteralFloat { value }
             }
 
             Tokens::OptionTrue => {

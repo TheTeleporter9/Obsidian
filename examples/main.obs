@@ -1,4 +1,7 @@
-var int x = 5
-var int y = 10
 
-print x < y and (x + 5 == y or y > 100)
+
+var float x = 0.5
+
+x / 10 * 100
+
+print x

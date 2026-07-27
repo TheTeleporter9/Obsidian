@@ -29,8 +29,8 @@ fn check_statement(node: &ASTNode) {
             check_print(node);
         }
 
-        ASTNode::ExpressionStatement { .. } => {
-            check_expression(node);
+        ASTNode::ExpressionStatement { expression } => {
+            check_expression(expression);
         }
 
         _ => panic!("Unexpected statement."),
@@ -153,12 +153,18 @@ fn check_binary_operation(left: &ASTNode, operator: &BinaryOperator, right: &AST
         | BinaryOperator::Subtract
         | BinaryOperator::Multiply
         | BinaryOperator::Divide => {
-            if left_type != right_type {
-                panic!(
+            match (left_type, right_type) {
+                (VarType::Int, VarType::Int) => VarType::Int,
+
+                (VarType::Float, VarType::Float) => VarType::Float,
+
+                (VarType::Int, VarType::Float) | (VarType::Float, VarType::Int) => VarType::Float,
+
+                _ => panic!(
                     "Type Error: Cannot perform {:?} on {:?} and {:?}",
                     operator, left_type, right_type
-                );
-            }
+                ),
+            };
 
             match left_type {
                 VarType::Int | VarType::Float => left_type,

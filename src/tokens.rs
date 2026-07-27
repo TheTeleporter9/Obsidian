@@ -3,6 +3,7 @@
 pub enum Tokens {
     Identifier(String),
     LiteralInt(i64),
+    LiteralFloat(f64),
 
     CONST,
     VAR,

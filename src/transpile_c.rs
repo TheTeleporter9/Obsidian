@@ -3,6 +3,7 @@ use std::fmt::format;
 use crate::{
     AST::ASTNode,
     DataType::{self, VarType},
+    semantic::symbol_table,
     tokens::{BinaryOperator, ComparisonOperator, LogicalOperator},
 };
 
@@ -70,13 +71,30 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         }
 
         ASTNode::PrintStatement { target } => {
-            let target_text = convert_node_to_c_string(&*target);
-            format!("printf(\"%d\\n\", {})", target_text)
+            let format_specifier = match target.as_ref() {
+                ASTNode::LiteralInt { .. } => "%d",
+                ASTNode::LiteralFloat { .. } => "%f",
+                ASTNode::LiteralBool { .. } => "%d",
+
+                ASTNode::Identifier { name } => match symbol_table::get_symbol(name).unwrap() {
+                    VarType::Int => "%d",
+                    VarType::Float => "%f",
+                    VarType::Bool => "%d",
+                },
+
+                _ => "%d", // TODO: Determine type of expressions
+            };
+
+            let target_text = convert_node_to_c_string(target);
+
+            format!("printf(\"{}\\n\", {})", format_specifier, target_text)
         }
 
         ASTNode::Identifier { name } => name.clone(),
 
         ASTNode::LiteralInt { value } => value.to_string(),
+
+        ASTNode::LiteralFloat { value } => value.to_string(),
 
         ASTNode::BinaryOperation {
             left,
@@ -174,6 +192,8 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
 
             format!("({} {} {})", left_text, op, right_text)
         }
+
+        ASTNode::ExpressionStatement { expression } => convert_node_to_c_string(expression),
 
         ASTNode::LogicalOperation {
             left,

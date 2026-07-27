@@ -2,8 +2,8 @@
 #include <stdbool.h>
 
 int main() {
-    int x = 5;
-    int y = 10;
-    printf("%d\n", ((x < y) && (((x + 5) == y) || (y > 100))));
+    float x = 0.5;
+    ((x / 10) * 100);
+    printf("%f\n", x);
     return 0;
 }

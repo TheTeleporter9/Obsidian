@@ -63,22 +63,41 @@ impl Lexer {
             }
 
             // Step2: Numbers
+
             if current_char.is_ascii_digit() {
-                let mut literal_buffer_int = String::new();
+                let mut number = String::new();
+                let mut has_decimal = false;
 
-                while self.current_index_pos < self.source.len()
-                    && self.source[self.current_index_pos].is_ascii_digit()
-                {
-                    literal_buffer_int.push(self.source[self.current_index_pos]);
+                println!("DEBUG-Lexer- Found number with '{}'", current_char);
 
-                    self.current_index_pos += 1;
+                while self.current_index_pos < self.source.len() {
+                    let c = self.source[self.current_index_pos];
+
+                    println!("DEBUG-Lexer- Reading '{}'", c);
+
+                    if c.is_ascii_digit() {
+                        number.push(c);
+                        self.current_index_pos += 1;
+                    } else if c == '.' && !has_decimal {
+                        has_decimal = true;
+                        number.push(c);
+                        self.current_index_pos += 1;
+                    } else {
+                        break;
+                    }
                 }
 
-                self.tokens_out
-                    .push(Tokens::LiteralInt(literal_buffer_int.parse().unwrap()));
+                if has_decimal {
+                    self.tokens_out
+                        .push(Tokens::LiteralFloat(number.parse().unwrap()));
+                } else {
+                    self.tokens_out
+                        .push(Tokens::LiteralInt(number.parse().unwrap()));
+                }
 
                 continue;
             }
+
             //Check for opreator
             if self.matches_string('=', '=') {
                 self.tokens_out.push(Tokens::OperatorEqual);
