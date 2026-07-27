@@ -1,7 +1,14 @@
 
+var int hi = 10
 
-var float x = 0.5
+var float b = 0.6
 
-x / 10 * 100
+var bool aelo = true
 
-print x
+hi - b
+
+print aelo
+
+print hi
+
+

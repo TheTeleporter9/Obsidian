@@ -2,8 +2,11 @@
 #include <stdbool.h>
 
 int main() {
-    float x = 0.5;
-    ((x / 10) * 100);
-    printf("%f\n", x);
+    int hi = 10;
+    float b = 0.6;
+    bool aelo = true;
+    (hi - b);
+    printf("%s\n", ((aelo) ? "true" : "false"));
+    printf("%d\n",hi);
     return 0;
 }

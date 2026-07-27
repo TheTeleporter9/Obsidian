@@ -3,7 +3,7 @@ use std::fmt::format;
 use crate::{
     AST::ASTNode,
     DataType::{self, VarType},
-    semantic::symbol_table,
+    semantic::{symbol_table, type_check},
     tokens::{BinaryOperator, ComparisonOperator, LogicalOperator},
 };
 
@@ -71,23 +71,24 @@ fn convert_node_to_c_string(node: &ASTNode) -> String {
         }
 
         ASTNode::PrintStatement { target } => {
-            let format_specifier = match target.as_ref() {
-                ASTNode::LiteralInt { .. } => "%d",
-                ASTNode::LiteralFloat { .. } => "%f",
-                ASTNode::LiteralBool { .. } => "%d",
-
-                ASTNode::Identifier { name } => match symbol_table::get_symbol(name).unwrap() {
-                    VarType::Int => "%d",
-                    VarType::Float => "%f",
-                    VarType::Bool => "%d",
-                },
-
-                _ => "%d", // TODO: Determine type of expressions
-            };
-
             let target_text = convert_node_to_c_string(target);
 
-            format!("printf(\"{}\\n\", {})", format_specifier, target_text)
+            match type_check::check_expression(target) {
+                VarType::Int => {
+                    format!("printf(\"%d\\n\",{})", target_text)
+                }
+
+                VarType::Float => {
+                    format!("printf(\"%d\\n\",{})", target_text)
+                }
+
+                VarType::Bool => {
+                    format!(
+                        "printf(\"%s\\n\", (({}) ? \"true\" : \"false\"))",
+                        target_text
+                    )
+                }
+            }
         }
 
         ASTNode::Identifier { name } => name.clone(),

@@ -37,7 +37,7 @@ fn check_statement(node: &ASTNode) {
     }
 }
 
-fn check_expression(node: &ASTNode) -> VarType {
+pub fn check_expression(node: &ASTNode) -> VarType {
     match node {
         ASTNode::LiteralInt { .. } => VarType::Int,
         ASTNode::LiteralFloat { .. } => VarType::Float,
