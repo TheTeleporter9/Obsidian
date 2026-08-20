@@ -1,4 +1,4 @@
-# What is obsidian/
+# What is Obsidian
 Obsidian (soon to be **Flint**) is a simple scripting language that transpiles it's backend into C. It is written in Rust.
 This project is primaraly a learning experience and is still in its early stages. But many core features alreddy exist.
 
