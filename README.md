@@ -1,75 +1,250 @@
+# What is obsidian/
+Obsidian (soon to be **Flint**) is a simple scripting language that transpiles it's backend into C. It is written in Rust.
+This project is primaraly a learning experience and is still in its early stages. But many core features alreddy exist.
 
-# DEVELOPMENT NOTE: 
-============================================================================
-### Initial logic for this system was drafted using AI pseudocode.
-### You can find it in the Research_Psudeocode.md file!
-### The entire codebase has since been manually rewritten, refactored, and 
-### engineered from scratch. Future development is entirely human-written.
-============================================================================
+---
 
-## What is Obsidian?
-Obsidian is a high-level programming language designed to simplify low-level development by enforcing Object-Oriented Programming (OOP) design patterns. It operates as a source-to-source transpiler written in Rust that outputs standard C code. At the moment is the language still very rudementary and Simple as it is a learning experiance!
+# Installation
 
-## How to run:
-First, download Rust.
+## Requirements
+* **Rust** (latest stable version)
+* **Cargo**
+* **GCC** (Preferably C99 or higier)
+* **Git** (Optional, for cloning repo)
 
-Then download GCC (tested with version 13.3.0 on Ubuntu 24.04.1).
 
-After that, create a file ending in `.obs` in the root directory and update the local path in the `main.rs` file.
-
-Then run:
-With cargo:
+# Build the compiler
 ```bash
-cargo run -- /abselute/path/to/file/
+cargo build --release
 ```
-or with Binary:
+```
+```
+
+Then find it in the release folder of the project.
+and run the executiable!
+
+At the release is a premade executiable, so just run that
+to get the compiler going
+
+
+Using the compiled executable:
+
+### Linux
+
 ```bash
-obsidian /path/to/program.obs
+./target/release/obsidian /absolute/path/to/program.obs
 ```
 
-## Language Syntax & Features
-Core Syntax
-is keywork driven
+### Windows
 
-## Strings currently do not exists, it will cause an error!
-
-```Variable Declaration: var <type> <name> = <value>```
-
-### Types:
-- #### bool -> either true or false (enforced)
-- #### int -> any hole number
-- #### float -> any fraction number
-
-``` Example: var int y = 4 ```
-
-#### Arithmetic Operations: +, -, *, /
-
-
-#### To send output use: ``` print <expression> ```
-### -> At the moment the print statment can't accept strings!
-
-Example Code
-Code snippet
+```powershell
+target\release\obsidian.exe C:\Users\User\Example\Path\to\program.obs
 ```
-# Hello World Program #
-var bool x = true
-var int y = 4
-var int z = 10
-
-# Arithmetic is permitted for numeric types #
-var int result = z + y - 9
-
-# Expressions can also be types wihtout needing a result var!#
-z + y - 3 * 5 / z
-# The first variable in the expression sequence will get the result assinged"
-
-# The same as: #
-z = z + y - 3 * 5 / z
 
 
-# Prints the numeric result #
-print result
+---
+
+# Current language features
+
+## Variable Declaration
+
+```obsidian
+var <type> <name> = <expression>
 ```
-Please note this behavior will change in future versions; this is an alpha build.
 
-![Restult](images/example_output.png)
+Example:
+
+```obsidian
+var int number = 42
+var float pi = 3.14159
+var bool running = true
+var string message = "Hello!"
+```
+
+## Supported types
+* **int** - Whole numbers
+* **float** - Decimal numbers
+* **bool** - `true` or `false`
+* **string** - Text enclosed in quotation marks
+
+## Arithmetic
+
+Supported operator:
+
+```text
++ - * / 
+```
+
+
+Example:
+```obsidian
+var int result = 5 + 10 * 2
+```
+
+Arithmetic only works for numbers i.e int and float!
+
+## Expression
+
+Expression can be written without explicitly assigning the result.
+
+```obsidian
+x + 5
+```
+
+Currently the **first** variable that comes in the expression will receive the result/
+
+The expression above is the same as below:
+
+```obsidian
+x = x + 5
+```
+
+> Note Make shore that the right variable comes first in the expression!
+
+## Assignment
+
+Variables can be reassigned.
+
+```obsidian
+x = 25
+
+message = "Goodbye"
+
+running = false
+```
+
+
+## Comparisons
+
+Supported comparison operators:
+
+```text
+==
+!=
+<
+<=
+>
+>=
+```
+
+Example:
+
+```obsidian
+var bool bigger = x > y
+```
+
+
+## Logical Operators
+
+```text
+and
+or
+!
+```
+
+Example:
+
+```obsidian
+var bool valid = x > 10 and !(y == 5)
+```
+
+Logical expressions are fully type checked.
+
+
+## Strings
+
+String literals are supported.
+
+```obsidian
+var string name = "Flint"
+
+print name
+```
+
+Current limitations:
+
+* No concatenation (`+`) yet
+* No interpolation (`"Hello $name"`) yet
+* No indexing
+* No iteration
+
+These features are coming soon
+
+## Printing
+
+Print any expression using:
+
+```obsidian
+print <expression>
+```
+
+Supported output:
+
+* int
+* float
+* bool (`true` / `false`)
+* string
+
+Examples:
+
+```obsidian
+print 42
+
+print 3.14
+
+print true
+
+print "Hello!"
+```
+
+
+## Type Checking
+
+The compiler performs semantic analysis before generating C.
+
+It currently checks:
+
+* Variable declarations
+* Assignments
+* Arithmetic expressions
+* Logical expressions
+* Comparison expressions
+* Unary operators
+* Undefined variables
+* Type mismatches
+
+Compilation stops if a type error is detected.
+
+
+# Example Program
+
+```obsidian
+# Hello World #
+
+var int x = 10
+var int y = 20
+
+var float scale = 3.6
+
+var string greeting = "Hello"
+
+var bool valid = x < y and scale != 10 and greeting == "Hello"
+
+print "Before"
+print x
+
+# Expression statements automatically assign back
+# to the first variable (temporary behaviour)
+
+x + 5 * 2
+
+print "After"
+print x
+
+print greeting
+
+print valid
+```
+
+
+![Result](images/example_output.png)
