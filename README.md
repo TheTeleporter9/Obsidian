@@ -17,8 +17,6 @@ This project is primaraly a learning experience and is still in its early stages
 ```bash
 cargo build --release
 ```
-```
-```
 
 Then find it in the release folder of the project.
 and run the executiable!
